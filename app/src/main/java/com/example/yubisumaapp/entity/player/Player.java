@@ -14,7 +14,8 @@ public class Player {
     public int fingerStock;
     public int playerIndex;
     public boolean isParent;
-    public boolean inBattleProcess; // バトル処理中か？（スキルなどの処理が終わったプレイヤーからfalseになる）
+    public boolean isClear = false;
+    private boolean useAction = false;
 
     protected Motion motion;
 
@@ -24,53 +25,45 @@ public class Player {
         this.playerIndex = playerIndex;
     }
 
-    public int getStandableFingerCount() {
-        return (fingerStock>2) ? 2 : fingerStock;
-    }
-
     public void turnStart() {
-        inBattleProcess = true;
         this.motion = null;
-        // 最大値に補正
-        if(UIDrawer.ICON_SIZE < skillPoint) {
-            skillPoint = UIDrawer.ICON_SIZE;
-        }
-        if(UIDrawer.ICON_SIZE < fingerStock) {
-            fingerStock = UIDrawer.ICON_SIZE;
-        }
+        useAction = false;
     }
 
-    public boolean isAvailableAttackSkill(int skillIndex) {
-        Skill useSkill = SkillManager.attackSkillList.get(skillIndex);
-        if(skillPoint < useSkill.getConsumeSkillPoint()) {
-            // 発動できない
-            return false;
+    public void turnEnd() {
+        isParent = false;
+        // クリアしていない
+        if(0 < fingerStock) {
+            // 次のターンへの準備
+            if(useAction) {
+                skillPoint++;
+            }
+            // 最大値に補正
+            if(UIDrawer.ICON_SIZE < skillPoint) {
+                skillPoint = UIDrawer.ICON_SIZE;
+            }
+            if(UIDrawer.ICON_SIZE < fingerStock) {
+                fingerStock = UIDrawer.ICON_SIZE;
+            }
         } else {
-            return true;
+            isClear = true;
         }
     }
 
-    public Skill setAttackSkill(int skillIndex) {
-        Skill useSkill = SkillManager.attackSkillList.get(skillIndex);
-        setMotion(useSkill);
-        return useSkill;
+    public void skillResult(boolean isSuccess) {
+        this.fingerStock += takeSkill().invokeEffect(isSuccess);
     }
 
-    public Skill setDefenceSkill(int skillIndex) {
-        Skill useSkill = SkillManager.defenceSkillList.get(skillIndex);
-        setMotion(useSkill);
-        return useSkill;
+    public void callResult(int standTotalFingerCount) {
+        // コール成功
+        if(standTotalFingerCount == takeCall().getCallCount()) {
+            this.fingerStock -= 1;
+        }
     }
 
     public String[] getAvailableSkillNameArray() {
         // スキルリストをスイッチ
-        ArrayList<Skill> skillList;
-        if(isParent) {
-            skillList = getAvailableAttackSkillList();
-        } else {
-            // availableなものにするかは後々
-            skillList = SkillManager.defenceSkillList;
-        }
+        ArrayList<Skill> skillList = getAvailableSkillList();
         // スキルネームリスト作成
         ArrayList<String> skillNameList = new ArrayList<>();
         for(Skill skill : skillList) {
@@ -84,49 +77,71 @@ public class Player {
         return activeSkill;
     }
 
-    public ArrayList<Skill> getAvailableAttackSkillList() {
-        ArrayList<Skill> availableSkill = new ArrayList<>();
-        for(Skill skill : SkillManager.attackSkillList) {
+    public ArrayList<Skill> getAvailableSkillList() {
+        ArrayList<Skill> skillList;
+        if(isParent) {
+            skillList = SkillManager.attackSkillList;
+        } else {
+            skillList = SkillManager.defenceSkillList;
+        }
+        ArrayList<Skill> availableSkillList = new ArrayList<>();
+        for(Skill skill : skillList) {
             if(skill.getConsumeSkillPoint() <= skillPoint) {
-                availableSkill.add(skill);
+                availableSkillList.add(skill);
             }
         }
-        return availableSkill;
+        return availableSkillList;
     }
 
-    public void skillResult(boolean isSuccess) {
-        // TODO : Skillでキャストしているが、ここでTrapとか土踏まずやちょうちょのメソッドが呼び出されているか確認
-        this.fingerStock += ((Skill)this.motion).invokeEffect(isSuccess);
-    }
-
-    public void callResult(int standTotalFingerCount) {
-        // コール成功
-        if(standTotalFingerCount == ((Call)this.motion).getCallCount()) {
-            this.fingerStock -= 1;
+    public void setSkillFromUI(int skillIndex) {
+        if(isParent) {
+            setMotion(SkillManager.attackSkillList.get(skillIndex));
+        } else {
+            setMotion(SkillManager.defenceSkillList.get(skillIndex));
         }
     }
 
-    public void setMotion(Action action) {
-        // ダブらないならskillPoint追加
-        if(this.motion == null) {
-            this.skillPoint++;
-        }
-        this.motion = action;
-    }
-
-    public void setMotion(Skill skill) {
-        this.motion = skill;
-        this.skillPoint -= skill.getConsumeSkillPoint();
+    public int getMyFingerCount() {
+        return (fingerStock>2) ? 2 : fingerStock;
     }
 
     public Motion getMotion() {
         return this.motion;
     }
 
-    public GameMaster.FingerStockListenerInterface listener = new GameMaster.FingerStockListenerInterface() {
-        @Override
-        public void isPlayerGameOver() {
-            inBattleProcess = false;
-        }
-    };
+    // オーバーロード
+    public void setMotion(Action action) {
+        useAction = true;
+        this.motion = action;
+    }
+
+    // オーバーロード
+    public void setMotion(Skill skill) {
+        this.motion = skill;
+        this.skillPoint -= skill.getConsumeSkillPoint();
+    }
+
+    public boolean hasAction() {
+        return motion instanceof Action;
+    }
+
+    public boolean hasCall() {
+        return motion instanceof Call;
+    }
+
+    public boolean hasSkill() {
+        return motion instanceof Skill;
+    }
+
+    public Action takeAction() {
+        return (Action)motion;
+    }
+
+    public Call takeCall() {
+        return (Call)motion;
+    }
+
+    public Skill takeSkill() {
+        return (Skill)motion;
+    }
 }

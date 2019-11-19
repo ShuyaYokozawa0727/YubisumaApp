@@ -41,15 +41,11 @@ public class BattleActivity extends AppCompatActivity {
 
         // GameMaster生成
         gameMaster = new GameMaster(playerSize);
-        // ゲーム設定
         gameMaster.startTurn();
 
-        // アイコンリストを作っておく
+        // UIのセットアップ
         UIDrawer = new UIDrawer(this, binding);
-
-        // UIのセット
-        UIDrawer.setUpPlayerUI(gameMaster.getPlayer());
-        UIDrawer.setUpOpponentUI(gameMaster.getOpponent());
+        setUpPlayerAndOpponentUI();
 
         binding.motionImageButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -64,14 +60,32 @@ public class BattleActivity extends AppCompatActivity {
         gameMaster.startBattle();
         // 終了処理
         gameMaster.endTurn();
+        // 開始処理
         if(gameMaster.inGame) {
-            // Player
-            UIDrawer.setUpPlayerUI(gameMaster.getPlayer());
-            // Opponent
-            UIDrawer.setUpOpponentUI(gameMaster.getOpponent());
+            setUpPlayerAndOpponentUI();
             // 次のターン開始
             gameMaster.startTurn();
+        } else {
+            showResult();
         }
+    }
+
+    private void showResult() {
+        String message = "";
+        // TODO:複数人対応
+        if(gameMaster.getPlayer().isClear) {
+            message = "君だ！";
+        } else if(gameMaster.getOpponent().isClear){
+            message = "CPUだ！";
+        } else {
+            message = "バグだああああ";
+        }
+        UIDrawer.showAlertDialog("試合終了","勝者は"+message);
+    }
+
+    private void setUpPlayerAndOpponentUI() {
+        UIDrawer.setUpPlayerUI(gameMaster.getPlayer());
+        UIDrawer.setUpOpponentUI(gameMaster.getOpponent());
     }
 
     private void showActionSelectDialog() {
@@ -94,7 +108,7 @@ public class BattleActivity extends AppCompatActivity {
             checkedItems.add(DEFAULT_CHECKED);
             new AlertDialog.Builder(context)
                     .setTitle("指を上げる数を選択")
-                    .setSingleChoiceItems(createNumberLabel(gameMaster.getPlayer().getStandableFingerCount()), DEFAULT_CHECKED, new DialogInterface.OnClickListener() {
+                    .setSingleChoiceItems(createNumberLabel(gameMaster.getPlayer().getMyFingerCount()), DEFAULT_CHECKED, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             checkedItems.clear();
@@ -124,8 +138,8 @@ public class BattleActivity extends AppCompatActivity {
     private void showCallDialog() {
         final List<Integer> checkedItems = new ArrayList<>();
         checkedItems.add(DEFAULT_CHECKED);
-        final int minNumber = ((Action)gameMaster.getPlayer().getMotion()).getStandCount();
-        int maxNumber =  gameMaster.getOpponent().getStandableFingerCount() + minNumber;
+        final int minNumber = gameMaster.getPlayer().takeAction().getStandCount();
+        int maxNumber =  gameMaster.getOpponent().getMyFingerCount() + minNumber;
         new AlertDialog.Builder(context)
                 .setTitle("コールする数を選択")
                 .setSingleChoiceItems(createRangeLabel(minNumber,maxNumber), DEFAULT_CHECKED, new DialogInterface.OnClickListener() {
@@ -140,7 +154,7 @@ public class BattleActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         if (!checkedItems.isEmpty()) {
                             int callCount = checkedItems.get(0) + minNumber;
-                            int myFingerUpCount = ((Action)gameMaster.getPlayer().getMotion()).getStandCount();
+                            int myFingerUpCount = gameMaster.getPlayer().takeAction().getStandCount();
                             gameMaster.getPlayer().setMotion(new Call(myFingerUpCount, callCount));
                             changeTurnProcess();
                         }
@@ -155,10 +169,9 @@ public class BattleActivity extends AppCompatActivity {
         public void onClick(DialogInterface dialog, int which) {
             final List<Integer> checkedItems = new ArrayList<>();
             checkedItems.add(DEFAULT_CHECKED);
-            String[] availableSkillNameArray = gameMaster.getPlayer().getAvailableSkillNameArray();
             new AlertDialog.Builder(context)
                     .setTitle("発動するスキル選択する. \nSP : " + gameMaster.getPlayer().skillPoint)
-                    .setSingleChoiceItems(availableSkillNameArray, DEFAULT_CHECKED, new DialogInterface.OnClickListener() {
+                    .setSingleChoiceItems(gameMaster.getPlayer().getAvailableSkillNameArray(), DEFAULT_CHECKED, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             checkedItems.clear();
@@ -169,15 +182,10 @@ public class BattleActivity extends AppCompatActivity {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (!checkedItems.isEmpty()) {
-                                int skillIndex = checkedItems.get(0);
-                                if(gameMaster.getPlayer().isParent) {
-                                    if(gameMaster.getPlayer().isAvailableAttackSkill(skillIndex)) {
-                                        gameMaster.getPlayer().setAttackSkill(skillIndex);
-                                    }
-                                } else {
-                                    gameMaster.getPlayer().setDefenceSkill(skillIndex);
-                                }
+                                gameMaster.getPlayer().setSkillFromUI(checkedItems.get(0));
                                 changeTurnProcess();
+                            } else {
+                                UIDrawer.showAlertDialog("スキルがありません", "");
                             }
                         }
                     })
@@ -192,13 +200,4 @@ public class BattleActivity extends AppCompatActivity {
             showActionSelectDialog();
         }
     };
-
-    private void showAlertDialog(String title, String message) {
-        new AlertDialog.Builder(context)
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("OK", null)
-                .show();
-    }
-
 }

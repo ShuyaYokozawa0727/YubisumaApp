@@ -5,6 +5,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import androidx.appcompat.app.AlertDialog;
+
 import com.example.yubisumaapp.R;
 import com.example.yubisumaapp.databinding.ActivityBattleBinding;
 import com.example.yubisumaapp.entity.motion.Action;
@@ -43,99 +45,71 @@ public class UIDrawer {
      *
      */
     public void setUpPlayerUI(Player player) {
-        setUpPlayerIconList(player.fingerStock, player.skillPoint);
+        int fingerStock = player.fingerStock;
+        int skillPoint = player.skillPoint;
+        // IconListを初期化・セット
+        binding.playerFingerStockLayout.removeAllViews();
+        binding.playerSkillPointLayout.removeAllViews();
+        for(int index=0; index < fingerStock; index++) {
+            binding.playerFingerStockLayout.addView(playerFingerStockIconList.get(index));
+        }
+        for(int index=0; index < skillPoint; index++) {
+            binding.playerSkillPointLayout.addView(playerSkillPointIconList.get(index));
+        }
+        // モーションテキストを初期化・セット
         if(player.getMotion()!=null) {
-           setPlayerMotionTextView(player.getMotion());
+            Motion playerMotion = player.getMotion();
+            String text = "";
+            if(player.hasCall()) {
+                Call playerCall = (Call)playerMotion;
+                text = "Action : "+ playerCall.getStandCount() + "\nCall : " +playerCall.getCallCount();
+            } else if(player.hasAction()) {
+                Action playerAction = (Action)playerMotion;
+                text = "Action : " + playerAction.getStandCount();
+            } else if(player.hasSkill()) {
+                Skill playerSkill = (Skill)playerMotion;
+                text = "Skill : " + playerSkill.getSkillName();
+            }
+            binding.playerMotionTextView.setText(text);
         }
     }
 
     public void setUpOpponentUI(Player opponent) {
-        setUpOpponentIconList(opponent.fingerStock, opponent.skillPoint);
-        if(opponent.getMotion()!=null) {
-            setOpponentMotionTextView(opponent.getMotion());
-        }
-    }
-
-    public void setUpPlayerIconList(int fingerStock, int skillPoint) {
-        /*
-         * 色々問題点が多いこの子たち。
-         * まずgetPlayerはクリア済みになるとExceptionが発生します
-         * さらに3人以上になるとUI的に厳しい。
-         */
-        binding.playerFingerStockLayout.removeAllViews();
-        binding.playerSkillPointLayout.removeAllViews();
-        setPlayerFingerStockIconList(fingerStock);
-        setPlayerSkillPointIconList(skillPoint);
-    }
-
-    public void setUpOpponentIconList(int fingerStock, int skillPoint) {
-        /*
-         * 色々問題点が多いこの子。
-         * まずgetOpponentはクリア済みになるとExceptionが発生します
-         * さらに3人以上になるとUI的に厳しい。
-         */
+        int fingerStock = opponent.fingerStock;
+        int skillPoint = opponent.skillPoint;
         binding.opponentFingerStockLayout.removeAllViews();
         binding.opponentSkillPointLayout.removeAllViews();
-        setOpponentFingerStockIcon(fingerStock);
-        setOpponentSkillPointIcon(skillPoint);
-    }
-
-    public void setPlayerMotionTextView(Motion playerMotion) {
-        String text = "";
-        if(playerMotion instanceof Call) {
-            Call playerCall = (Call)playerMotion;
-            text = "Action : "+ playerCall.getStandCount() + "\nCall : " +playerCall.getCallCount();
-        } else if(playerMotion instanceof Action) {
-            Action playerAction = (Action)playerMotion;
-            text = "Action : " + playerAction.getStandCount();
-        } else if(playerMotion instanceof Skill) {
-            Skill playerSkill = (Skill)playerMotion;
-            text = "Skill : " + playerSkill.getSkillName();
-        }
-        binding.playerMotionTextView.setText(text);
-    }
-
-    public void setOpponentMotionTextView(Motion opponentMotion) {
-        String text = "";
-        if(opponentMotion instanceof Call) {
-            Call opponentCall = (Call)opponentMotion;
-            text = "Action : "+ opponentCall.getStandCount() + "\nCall : " +opponentCall.getCallCount();
-        } else if(opponentMotion instanceof Action) {
-            Action opponentAction = (Action)opponentMotion;
-            text = "Action : " + opponentAction.getStandCount();
-        } else if(opponentMotion instanceof Skill) {
-            Skill opponentSkill = (Skill)opponentMotion;
-            text = "Skill : " + opponentSkill.getSkillName();
-        }
-        binding.opponentMotionTextView.setText(text);
-    }
-
-    public  void setPlayerFingerStockIconList(int fingerStock) {
-        // fingerStockの数だけセット
-        for(int index=0; index < fingerStock; index++) {
-            binding.playerFingerStockLayout.addView(playerFingerStockIconList.get(index));
-        }
-    }
-
-    public  void setPlayerSkillPointIconList(int skillPoint) {
-        // fingerStockの数だけセット
-        for(int index=0; index < skillPoint; index++) {
-            binding.playerSkillPointLayout.addView(playerSkillPointIconList.get(index));
-        }
-    }
-
-    public void setOpponentFingerStockIcon(int fingerStock) {
-        // fingerStockの数だけセット
         for(int index=0; index < fingerStock; index++) {
             binding.opponentFingerStockLayout.addView(opponentFingerStockIconList.get(index));
         }
-    }
-
-    public void setOpponentSkillPointIcon(int skillPoint) {
-        // fingerStockの数だけセット
         for(int index=0; index < skillPoint; index++) {
             binding.opponentSkillPointLayout.addView(opponentSkillPointIconList.get(index));
         }
+        if(opponent.getMotion()!=null) {
+            Motion opponentMotion = opponent.getMotion();
+            String text = "";
+            if(opponent.hasCall()) {
+                Call opponentCall = (Call)opponentMotion;
+                text = "Action : "+ opponentCall.getStandCount() + "\nCall : " +opponentCall.getCallCount();
+            } else if(opponent.hasAction()) {
+                Action opponentAction = (Action)opponentMotion;
+                text = "Action : " + opponentAction.getStandCount();
+            } else if(opponent.hasSkill()) {
+                Skill opponentSkill = (Skill)opponentMotion;
+                text = "Skill : " + opponentSkill.getSkillName();
+            }
+            binding.opponentMotionTextView.setText(text);
+        }
+    }
+
+
+
+    public void showAlertDialog(String title, String message) {
+        new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show();
     }
 
     /*

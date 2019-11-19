@@ -1,7 +1,5 @@
 package com.example.yubisumaapp.entity.player;
 
-import android.util.Log;
-
 import com.example.yubisumaapp.entity.motion.Action;
 import com.example.yubisumaapp.entity.motion.Call;
 import com.example.yubisumaapp.entity.motion.skill.SkillManager;
@@ -29,7 +27,7 @@ public class CPU extends Player {
         super(skillPoint, fingerStock, playerIndex);
     }
 
-    public void createCPUMotion(GameMaster gameMaster) {
+    void createCPUMotion(GameMaster gameMaster) {
         this.gameMaster = gameMaster;
         motion = null;
         if (isParent) {
@@ -57,46 +55,44 @@ public class CPU extends Player {
 
     private void randomCall() {
         // 自分以外の指の本数
-        int othersFingersSize = gameMaster.getTotalFingerCount() - getStandableFingerCount();
+        int othersFingersSize = gameMaster.getTotalFingerCount() - getMyFingerCount();
         // 自分が上げる指の本数
-        int myStandFingerCount = random.nextInt(getStandableFingerCount());
+        int myStandFingerCount = random.nextInt(getMyFingerCount());
         // コールする数（自分+自分以外の本数を最大値としたランダムな数）
         int myCallCount = myStandFingerCount + random.nextInt(othersFingersSize);
-
         this.setMotion(new Call(myStandFingerCount, myCallCount));
     }
 
     private void randomSkill() {
         // 発動可能だったSkillをランダムにセット
-        int randomNumber = random.nextInt(this.getAvailableAttackSkillList().size());
-        setAttackSkill(randomNumber);
+        int randomNumber = random.nextInt(this.getAvailableSkillList().size());
+        setSkillFromUI(randomNumber);
     }
 
-    private void childMotion() throws NullPointerException{
+    private void childMotion() {
+        // もし今の親のスキルポイントが0ならば
+        if(searchParentPlayer().skillPoint == 0) {
+            this.setMotion(new Action(random.nextInt(getMyFingerCount())));
+        } else  {
+            // 今の親のスキルポイントが1以上
+            // ランダムな確率でActionか、トラップ発動
+            boolean isAction = random.nextBoolean();
+            if(isAction) {
+                this.setMotion(new Action(random.nextInt(getMyFingerCount())));
+            } else {
+                this.setMotion(SkillManager.defenceSkillList.get(SkillManager.TRAP));
+            }
+        }
+    }
+
+    private Player searchParentPlayer() {
         // 親のskillPoint, fingerStockを取得
         Player parent = null;
         for(Player otherPlayer : gameMaster.getPlayers()) {
             if(otherPlayer.isParent) {
-               parent = otherPlayer;
+                parent = otherPlayer;
             }
         }
-        if(parent != null) {
-            // もし今の親のスキルポイントが0ならば
-            if(parent.skillPoint == 0) {
-                this.setMotion(new Action(random.nextInt(getStandableFingerCount())));
-            } else  {
-                // 今の親のスキルポイントが1以上
-                // ランダムな確率でActionか、トラップ発動
-                boolean isAction = random.nextBoolean();
-                if(isAction) {
-                    this.setMotion(new Action(random.nextInt(getStandableFingerCount())));
-                } else {
-                    this.setMotion(SkillManager.defenceSkillList.get(SkillManager.TRAP));
-                }
-            }
-        } else {
-            Log.e("CPU.childMotion", "parentのインスタンスが見つからなかった");
-        }
+        return parent;
     }
-
 }

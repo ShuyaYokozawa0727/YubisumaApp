@@ -3,8 +3,6 @@ package com.example.yubisumaapp.entity.player;
 import android.util.Log;
 
 import com.example.yubisumaapp.entity.motion.Action;
-import com.example.yubisumaapp.entity.motion.Call;
-import com.example.yubisumaapp.entity.motion.skill.Skill;
 import com.example.yubisumaapp.entity.motion.skill.Trap;
 
 import java.util.ArrayList;
@@ -13,22 +11,19 @@ import java.util.EventListener;
 public class GameMaster {
     private int turnCount = 0; // ターン開始時にインクリメント
     private int totalFingerCount = 0; // ターン開始時にチェック
-
-    private int playerSize = 0;
+    private int playerSizeAtStart = 0;
     private int parentPlayerIndex = 0;
 
-    public boolean inGame = false; // ターン終了時にチェック
+    public boolean inGame = true; // ターン終了時にチェック
 
     private ArrayList<Player> players = new ArrayList<>();
-    private ArrayList<Player> clearedPlayer = new ArrayList<>();
+    private ArrayList<Player> clearPlayer = new ArrayList<>();
 
     private Player parentPlayer;
 
-    public GameMaster(int playerSize) {
-        inGame = true;
-        this.playerSize = playerSize;
-        createPlayers(playerSize);
-        parentPlayerIndex = 0;
+    public GameMaster(int playerSizeAtStart) {
+        this.playerSizeAtStart = playerSizeAtStart;
+        createPlayers(playerSizeAtStart);
         //parentPlayerIndex = new Random().nextInt(playerSize);
         players.get(parentPlayerIndex).isParent = true;
     }
@@ -36,12 +31,12 @@ public class GameMaster {
     // Activityから呼び出される？
     public void startTurn() {
         turnCount++;
-        countTotalFingerSize();
-        cacheParentPlayer();
         // プレイヤー達の開始処理
         for(Player player : players) {
             player.turnStart();
         }
+        cacheTotalFingerSize();
+        cacheParentPlayer();
     }
 
     // これはActivityでPlayerのMotionが確定したら呼び出される
@@ -49,10 +44,10 @@ public class GameMaster {
         Log.v("GameMaster.startBattle", "バトルスタート");
         determineCPUMotion();
         // 親がどんな動きをしたか
-        if(parentPlayer.motion instanceof Call) {
+        if(parentPlayer.hasCall()) {
             parentCallProcess();
 
-        } else if (parentPlayer.motion instanceof Skill) {
+        } else if (parentPlayer.hasSkill()) {
             parentSkillProcess();
 
         } else {
@@ -62,21 +57,33 @@ public class GameMaster {
     }
 
     public void endTurn() {
-        // isParent初期化
         for(Player player : players) {
-            player.isParent = false;
+            player.turnEnd();
         }
-
-        // Clearしたプレイヤーを検索
-        // TODO : fingerStockが 0 になった瞬間に playerをクリアさせるEventリスナーを作成する。
-        findClearPlayer();
-
-        // isParentをセット
-        int nowParentIndex = parentPlayerIndex;
-        // 次のParentが見つからなかったらゲーム終了
-        if(!findNextParent(nowParentIndex)) {
-            // リスナーのメソッドから変更する
+        for(Player player : players) {
+            if(player.isClear) {
+                clearPlayer.add(player);
+                players.remove(player);
+            }
+        }
+        if(clearPlayer.size() == playerSizeAtStart-1) {
             inGame = false;
+        } else {
+            findNextParent();
+        }
+    }
+
+    private void findNextParent() {
+        int nextParentIndex = parentPlayerIndex = (parentPlayerIndex+1) % players.size();
+        for(Player player : players) {
+            if(player.playerIndex == nextParentIndex) {
+                if(player.isClear) {
+                    // 再起？
+                    findNextParent();
+                } else {
+                    player.isParent=true;
+                }
+            }
         }
     }
 
@@ -116,26 +123,19 @@ public class GameMaster {
 
     // parentがCallだったときの処理
     private void parentCallProcess() {
-        int standTotalFingerCount = 0;
+        int standTotalFingerCount = parentPlayer.takeCall().getCallCount();
         for(Player childPlayer : players) {
-            // 親プレイヤー以外
-            if(!childPlayer.equals(parentPlayer)) {
-                if(childPlayer.motion instanceof Action) {
-                    standTotalFingerCount+=((Action)childPlayer.motion).getStandCount();
-                } else if(childPlayer.motion instanceof Skill) {
-                    if(childPlayer.motion instanceof Trap) {
-                        // Trap失敗(fingerStockを変更)
-                        Log.v("ゲームマスタ", "Trap失敗");
-                        childPlayer.skillResult(false);
-                    } else {
-                        // GTD
-                        // Trap以外の防御スキルが実装されたら増える
-                    }
+            if(childPlayer.hasAction()) {
+                standTotalFingerCount+=childPlayer.takeAction().getStandCount();
+            } else if(childPlayer.hasSkill()) {
+                if(childPlayer.motion instanceof Trap) {
+                    childPlayer.skillResult(false);
+                } else {
+                    // TODO: Trap以外の防御スキルができたら追加
                 }
             }
         }
         parentPlayer.callResult(standTotalFingerCount);
-
     }
 
     // parentがSkillを発動したときの処理
@@ -144,49 +144,11 @@ public class GameMaster {
         for(Player childPlayer : players) {
             if(!childPlayer.equals(parentPlayer)) {
                 if(childPlayer.motion instanceof Trap) {
-                    /* TODO : 【仕様の確定】1つでもTrapがあったら失敗か、Trapの数=失敗数かを決める.
-                                    前者の場合、成功時(Trap:0)はSKillの1回分の効力発動、失敗時(Trap>1)でも1回分の失敗
-                                    後者の場合、多数決的にTrap:1, Action:2なら結果的にfingerStockは1減る(成功)
-                     */
                     isSuccess = false;
                 }
             }
         }
         parentPlayer.skillResult(isSuccess);
-    }
-
-    // クリアしたプレイヤーを見つける
-    private void findClearPlayer() {
-        for(Player player : players) {
-            if(player.fingerStock <= 0) {
-                clearedPlayer.add(player);
-                players.remove(player);
-            }
-        }
-    }
-
-    // 次の親プレイヤーを見つける
-    private boolean findNextParent(int beforeParentIndex) {
-        // parentIndexを変更
-        parentPlayerIndex = (parentPlayerIndex+1) % playerSize;
-        boolean foundNextParent = false;
-        // 次の親プレイヤーがいればisParentをセット
-        for(Player player : players) {
-            if (player.playerIndex == parentPlayerIndex) {
-                player.isParent = true;
-                foundNextParent = true;
-            }
-        }
-        // いなければ（clearPlayerリストに移動していたら）
-        if(!foundNextParent) {
-            if(beforeParentIndex != parentPlayerIndex) {
-                // 次の親プレイヤーを検索
-                foundNextParent = findNextParent(beforeParentIndex);
-            }
-            // Indexが戻ってきたら、プレイヤーは一人しかいない。
-            // そのままfalseを返す
-        }
-        return foundNextParent;
     }
 
     // 自分を見つける
@@ -205,10 +167,10 @@ public class GameMaster {
     }
 
     // 場の指の本数を数える
-    private void countTotalFingerSize() {
+    private void cacheTotalFingerSize() {
         totalFingerCount = 0;
         for(Player player : players) {
-            totalFingerCount += player.getStandableFingerCount();
+            totalFingerCount += player.getMyFingerCount();
         }
     }
 
