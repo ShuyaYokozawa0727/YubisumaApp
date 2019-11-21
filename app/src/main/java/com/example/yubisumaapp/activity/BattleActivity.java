@@ -7,6 +7,7 @@ import androidx.databinding.DataBindingUtil;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 
@@ -47,22 +48,20 @@ public class BattleActivity extends AppCompatActivity {
 
         // UIのセットアップ
         UIDrawHelper = new UIDrawHelper(this, binding);
-        setUpPlayerAndOpponentUI();
+        setUpDisplay();
 
-        binding.motionImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // アクションダイアログ表示
-                showActionSelectDialog();
-            }
-        });
+        binding.fingerUpImageButton.setOnClickListener(fingerUpEventHandler);
+        binding.skillImageButton.setOnClickListener(skillEventHandler);
     }
 
     private void changeTurnProcess() {
         gameMaster.startBattle();
-        setUpPlayerAndOpponentUI();
+        setUpDisplay();
+        // ステータスの変化をセット
+        UIDrawHelper.setChangeStatus(gameMaster.getPlayer(), gameMaster.getOpponent());
         // 終了処理
         gameMaster.endTurn();
+
         // 開始処理
         if(gameMaster.inGame) {
             // 次のターン開始
@@ -100,33 +99,22 @@ public class BattleActivity extends AppCompatActivity {
                 .setNegativeButton("NO", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        binding.motionImageButton.setVisibility(View.INVISIBLE);
+
                     }
                 })
+                .setCancelable(false)
                 .show();
     }
 
-    private void setUpPlayerAndOpponentUI() {
+    public void setUpDisplay() {
         UIDrawHelper.setUpPlayerUI(gameMaster.getPlayer());
         UIDrawHelper.setUpOpponentUI(gameMaster.getOpponent());
     }
 
-    private void showActionSelectDialog() {
-        String message = "俺じゃねえ";
-        if(gameMaster.getPlayer().isParent) {
-            message = "俺！！";
-        }
-        new AlertDialog.Builder(context)
-                .setTitle("アクション")
-                .setMessage("親 : " + message) // クラス変数で保持
-                .setPositiveButton("アクション", fingerUpEventHandler)
-                .setNeutralButton("スキル", skillEventHandler)
-                .show();
-    }
-
-    private DialogInterface.OnClickListener fingerUpEventHandler = new DialogInterface.OnClickListener() {
+    private View.OnClickListener fingerUpEventHandler = new View.OnClickListener() {
         @Override
-        public void onClick(DialogInterface dialog, int which) {
+        public void onClick(View v) {
+            binding.fingerUpImageButton.setBackgroundColor(Color.YELLOW);
             final List<Integer> checkedItems = new ArrayList<>();
             checkedItems.add(DEFAULT_CHECKED);
             new AlertDialog.Builder(context)
@@ -153,7 +141,7 @@ public class BattleActivity extends AppCompatActivity {
                             }
                         }
                     })
-                    .setNegativeButton("Cancel", cancelListener)
+                    .setNegativeButton("Cancel", UIDrawHelper.fingerCancelListener)
                     .show();
         }
     };
@@ -183,14 +171,15 @@ public class BattleActivity extends AppCompatActivity {
                         }
                     }
                 })
-                .setNegativeButton("Cancel", cancelListener)
+                .setNegativeButton("Cancel", UIDrawHelper.fingerCancelListener)
                 .show();
     }
 
-    private DialogInterface.OnClickListener skillEventHandler = new DialogInterface.OnClickListener() {
+    private View.OnClickListener skillEventHandler = new View.OnClickListener() {
         @Override
-        public void onClick(DialogInterface dialog, int which) {
+        public void onClick(View view) {
             final List<Integer> checkedItems = new ArrayList<>();
+            binding.skillImageButton.setBackgroundColor(Color.YELLOW);
             checkedItems.add(DEFAULT_CHECKED);
             new AlertDialog.Builder(context)
                     .setTitle("発動するスキル選択する. \nSP : " + gameMaster.getPlayer().skillPoint)
@@ -212,15 +201,8 @@ public class BattleActivity extends AppCompatActivity {
                             }
                         }
                     })
-                    .setNegativeButton("Cancel", cancelListener)
+                    .setNegativeButton("Cancel", UIDrawHelper.skillCancelListener)
                     .show();
-        }
-    };
-
-    private DialogInterface.OnClickListener cancelListener = new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            showActionSelectDialog();
         }
     };
 }

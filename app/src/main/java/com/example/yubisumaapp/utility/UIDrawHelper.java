@@ -2,6 +2,7 @@ package com.example.yubisumaapp.utility;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.graphics.Color;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -45,9 +46,48 @@ public class UIDrawHelper {
      * BattleActivityで使われます
      *
      */
+    private void initColorFingerUp() {
+        binding.fingerUpImageButton.setBackgroundColor(Color.DKGRAY);
+    }
+
+    private void initColorSkill() {
+        binding.skillImageButton.setBackgroundColor(Color.DKGRAY);
+    }
+
+    public DialogInterface.OnClickListener fingerCancelListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            initColorFingerUp();
+        }
+    };
+
+    public DialogInterface.OnClickListener skillCancelListener = new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+            initColorSkill();
+        }
+    };
+
+    public void setChangeStatus(Player player, Player opponent) {
+        // ステータスの変化
+        int changePlayerFingerStock = player.fingerStock - player.beforeFingerStock;
+        int changePlayerSkillPoint = player.skillPoint - player.beforeSkillPoint;
+        String playerChangeStatus = "FS : "+changePlayerFingerStock+"\nSP : "+changePlayerSkillPoint;
+        binding.playerChangeStatusTextView.setText(playerChangeStatus);
+        // ステータスの変化
+        int changeOpponentFingerStock = opponent.fingerStock - opponent.beforeFingerStock;
+        int changeOpponentSkillPoint = opponent.skillPoint - opponent.beforeSkillPoint;
+        String opponentChangeStatus = "FS : "+changeOpponentFingerStock+"\nSP : "+changeOpponentSkillPoint;
+        binding.opponentChangeStatusTextView.setText(opponentChangeStatus);
+
+    }
+
     public void setUpPlayerUI(Player player) {
         int fingerStock = player.fingerStock;
         int skillPoint = player.skillPoint;
+        // ボタンの色を初期化
+        initColorFingerUp();
+        initColorSkill();
         // IconListを初期化・セット
         binding.playerFingerStockLayout.removeAllViews();
         binding.playerSkillPointLayout.removeAllViews();
@@ -78,6 +118,8 @@ public class UIDrawHelper {
     public void setUpOpponentUI(Player opponent) {
         int fingerStock = opponent.fingerStock;
         int skillPoint = opponent.skillPoint;
+
+        // アイコンの初期化
         binding.opponentFingerStockLayout.removeAllViews();
         binding.opponentSkillPointLayout.removeAllViews();
         for(int index=0; index < fingerStock; index++) {

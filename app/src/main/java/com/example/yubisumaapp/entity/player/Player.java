@@ -17,6 +17,9 @@ public class Player {
     public boolean isClear = false;
     private boolean useAction = false;
 
+    public int beforeFingerStock = 0;
+    public int beforeSkillPoint = 0;
+
     protected Motion motion;
 
     Player(int skillPoint, int fingerStock, int playerIndex) {
@@ -35,6 +38,8 @@ public class Player {
         if(UIDrawHelper.ICON_SIZE < fingerStock) {
             fingerStock = UIDrawHelper.ICON_SIZE;
         }
+        beforeFingerStock = this.fingerStock;
+        beforeSkillPoint = this.skillPoint;
     }
 
     public void battleEnd() {
@@ -42,7 +47,6 @@ public class Player {
             skillPoint++;
         }
     }
-
 
     public void turnEnd() {
         isParent = false;
@@ -122,7 +126,10 @@ public class Player {
         this.motion = skill;
         this.skillPoint -= skill.getConsumeSkillPoint();
     }
-    public boolean isCPU() { return this instanceof CPU;}
+
+    public boolean isCPU() {
+        return this instanceof CPU;
+    }
 
     public boolean hasAction() {
         return motion instanceof Action;
