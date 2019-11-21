@@ -2,7 +2,6 @@ package com.example.yubisumaapp.entity.player;
 
 import android.util.Log;
 
-import com.example.yubisumaapp.entity.motion.Action;
 import com.example.yubisumaapp.entity.motion.skill.Trap;
 
 import java.util.ArrayList;
@@ -17,7 +16,7 @@ public class GameMaster {
     public boolean inGame = true; // ターン終了時にチェック
 
     private ArrayList<Player> players = new ArrayList<>();
-    private ArrayList<Player> clearPlayer = new ArrayList<>();
+    private ArrayList<Player> clearPlayers = new ArrayList<>();
 
     private Player parentPlayer;
 
@@ -46,13 +45,14 @@ public class GameMaster {
         // 親がどんな動きをしたか
         if(parentPlayer.hasCall()) {
             parentCallProcess();
-
         } else if (parentPlayer.hasSkill()) {
             parentSkillProcess();
-
         } else {
             // これはおかしいけどめっちゃ来そう
             Log.v("うわああ", "現在の親のMotionがCallでもSkillでもない。。。");
+        }
+        for(Player player : players) {
+            player.battleEnd();
         }
     }
 
@@ -62,11 +62,13 @@ public class GameMaster {
         }
         for(Player player : players) {
             if(player.isClear) {
-                clearPlayer.add(player);
-                players.remove(player);
+                clearPlayers.add(player);
             }
         }
-        if(clearPlayer.size() == playerSizeAtStart-1) {
+        for(Player clearPlayer : clearPlayers) {
+            players.remove(clearPlayer);
+        }
+        if(clearPlayers.size() == playerSizeAtStart-1) {
             inGame = false;
         } else {
             findNextParent();
@@ -90,9 +92,12 @@ public class GameMaster {
     // 一人対戦
     // プレイヤーを作成する
     private void createPlayers(int playerSize) {
-        players.add(new Player(0, 2, 0));
+        int skillPoint = 1; // TODO: 0で始めるとバグる(初手で土踏まず使える)
+        int fingerCount = 2;
+
+        players.add(new Player(skillPoint, fingerCount, 0));
         for(int index=1; index < playerSize; index++) {
-            players.add(new CPU(0, 2, index));
+            players.add(new CPU(skillPoint, fingerCount, index));
         }
     }
 
@@ -123,13 +128,13 @@ public class GameMaster {
 
     // parentがCallだったときの処理
     private void parentCallProcess() {
-        int standTotalFingerCount = parentPlayer.takeCall().getCallCount();
-        for(Player childPlayer : players) {
-            if(childPlayer.hasAction()) {
-                standTotalFingerCount+=childPlayer.takeAction().getStandCount();
-            } else if(childPlayer.hasSkill()) {
-                if(childPlayer.motion instanceof Trap) {
-                    childPlayer.skillResult(false);
+        int standTotalFingerCount = 0;
+        for(Player player : players) {
+            if(player.hasAction()) {
+                standTotalFingerCount+=player.takeAction().getStandCount();
+            } else if(player.hasSkill()) {
+                if(player.motion instanceof Trap) {
+                    player.skillResult(false);
                 } else {
                     // TODO: Trap以外の防御スキルができたら追加
                 }
@@ -164,6 +169,10 @@ public class GameMaster {
     // playerリストを返す
     public ArrayList<Player> getPlayers() {
         return players;
+    }
+
+    public ArrayList<Player> getClearPlayers() {
+        return clearPlayers;
     }
 
     // 場の指の本数を数える

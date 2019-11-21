@@ -1,6 +1,7 @@
 package com.example.yubisumaapp.utility;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -17,7 +18,7 @@ import com.example.yubisumaapp.entity.player.Player;
 
 import java.util.ArrayList;
 
-public class UIDrawer {
+public class UIDrawHelper {
 
     public static final int ICON_SIZE = 7;
     private static int WC = ViewGroup.LayoutParams.WRAP_CONTENT;
@@ -31,7 +32,7 @@ public class UIDrawer {
     private Context context;
     private ActivityBattleBinding binding;
 
-    public UIDrawer(Context context, ActivityBattleBinding binding) {
+    public UIDrawHelper(Context context, ActivityBattleBinding binding) {
         this.context = context;
         this.binding = binding;
         createPlayerFingerStockIconList();
@@ -101,8 +102,6 @@ public class UIDrawer {
             binding.opponentMotionTextView.setText(text);
         }
     }
-
-
 
     public void showAlertDialog(String title, String message) {
         new AlertDialog.Builder(context)

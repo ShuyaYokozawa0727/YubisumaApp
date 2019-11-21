@@ -5,7 +5,7 @@ import com.example.yubisumaapp.entity.motion.Call;
 import com.example.yubisumaapp.entity.motion.Motion;
 import com.example.yubisumaapp.entity.motion.skill.Skill;
 import com.example.yubisumaapp.entity.motion.skill.SkillManager;
-import com.example.yubisumaapp.utility.UIDrawer;
+import com.example.yubisumaapp.utility.UIDrawHelper;
 
 import java.util.ArrayList;
 
@@ -28,24 +28,26 @@ public class Player {
     public void turnStart() {
         this.motion = null;
         useAction = false;
+        // 最大値に補正
+        if(UIDrawHelper.ICON_SIZE < skillPoint) {
+            skillPoint = UIDrawHelper.ICON_SIZE;
+        }
+        if(UIDrawHelper.ICON_SIZE < fingerStock) {
+            fingerStock = UIDrawHelper.ICON_SIZE;
+        }
     }
+
+    public void battleEnd() {
+        if(hasAction()) {
+            skillPoint++;
+        }
+    }
+
 
     public void turnEnd() {
         isParent = false;
         // クリアしていない
-        if(0 < fingerStock) {
-            // 次のターンへの準備
-            if(useAction) {
-                skillPoint++;
-            }
-            // 最大値に補正
-            if(UIDrawer.ICON_SIZE < skillPoint) {
-                skillPoint = UIDrawer.ICON_SIZE;
-            }
-            if(UIDrawer.ICON_SIZE < fingerStock) {
-                fingerStock = UIDrawer.ICON_SIZE;
-            }
-        } else {
+        if(fingerStock <= 0) {
             isClear = true;
         }
     }
@@ -120,6 +122,7 @@ public class Player {
         this.motion = skill;
         this.skillPoint -= skill.getConsumeSkillPoint();
     }
+    public boolean isCPU() { return this instanceof CPU;}
 
     public boolean hasAction() {
         return motion instanceof Action;

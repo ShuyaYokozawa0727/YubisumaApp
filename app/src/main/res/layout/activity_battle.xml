@@ -53,7 +53,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/motionImageButton" />
+                app:layout_constraintTop_toBottomOf="@+id/motionImageButton"
+                app:layout_constraintVertical_bias="0.0" />
 
             <ImageButton
                 android:id="@+id/motionImageButton"
@@ -78,7 +79,7 @@
                 android:id="@+id/opponentFingerStockLayout"
                 android:layout_width="0dp"
                 android:layout_height="30dp"
-                android:layout_marginTop="16dp"
+                android:layout_marginTop="8dp"
                 android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
@@ -98,7 +99,7 @@
                 android:id="@+id/playerFingerStockLayout"
                 android:layout_width="0dp"
                 android:layout_height="30dp"
-                android:layout_marginBottom="16dp"
+                android:layout_marginBottom="8dp"
                 android:orientation="horizontal"
                 app:layout_constraintBottom_toTopOf="@+id/playerSkillPointLayout"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -113,8 +114,10 @@
                 android:textSize="30sp"
                 app:layout_constraintBottom_toTopOf="@+id/motionImageButton"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/opponentFingerStockLayout" />
+                app:layout_constraintTop_toBottomOf="@+id/opponentFingerStockLayout"
+                app:layout_constraintVertical_bias="1.0" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

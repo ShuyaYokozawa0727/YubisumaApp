@@ -6,6 +6,7 @@ import androidx.databinding.DataBindingUtil;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 
@@ -14,7 +15,8 @@ import com.example.yubisumaapp.databinding.ActivityBattleBinding;
 import com.example.yubisumaapp.entity.motion.Action;
 import com.example.yubisumaapp.entity.motion.Call;
 import com.example.yubisumaapp.entity.player.GameMaster;
-import com.example.yubisumaapp.utility.UIDrawer;
+import com.example.yubisumaapp.entity.player.Player;
+import com.example.yubisumaapp.utility.UIDrawHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +32,7 @@ public class BattleActivity extends AppCompatActivity {
     private static int playerSize = 2;
 
     private ActivityBattleBinding binding;
-    private UIDrawer UIDrawer;
+    private UIDrawHelper UIDrawHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,7 +46,7 @@ public class BattleActivity extends AppCompatActivity {
         gameMaster.startTurn();
 
         // UIのセットアップ
-        UIDrawer = new UIDrawer(this, binding);
+        UIDrawHelper = new UIDrawHelper(this, binding);
         setUpPlayerAndOpponentUI();
 
         binding.motionImageButton.setOnClickListener(new View.OnClickListener() {
@@ -58,11 +60,11 @@ public class BattleActivity extends AppCompatActivity {
 
     private void changeTurnProcess() {
         gameMaster.startBattle();
+        setUpPlayerAndOpponentUI();
         // 終了処理
         gameMaster.endTurn();
         // 開始処理
         if(gameMaster.inGame) {
-            setUpPlayerAndOpponentUI();
             // 次のターン開始
             gameMaster.startTurn();
         } else {
@@ -73,19 +75,40 @@ public class BattleActivity extends AppCompatActivity {
     private void showResult() {
         String message = "";
         // TODO:複数人対応
-        if(gameMaster.getPlayer().isClear) {
-            message = "君だ！";
-        } else if(gameMaster.getOpponent().isClear){
-            message = "CPUだ！";
-        } else {
-            message = "バグだああああ";
+        for(Player clearPlayers : gameMaster.getClearPlayers()) {
+            if (clearPlayers.isCPU()) {
+                message = "おれじぇねぇぇぇえ！！";
+            } else {
+                message = "俺！！！！１";
+            }
         }
-        UIDrawer.showAlertDialog("試合終了","勝者は"+message);
+
+        new AlertDialog.Builder(context)
+                .setTitle("【バトル終了】バトルを再開しますか？")
+                .setMessage("勝者は" + message)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = getIntent();
+                        overridePendingTransition(0, 0);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                        finish();
+                        overridePendingTransition(0, 0);
+                        startActivity(intent);
+                    }
+                })
+                .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        binding.motionImageButton.setVisibility(View.INVISIBLE);
+                    }
+                })
+                .show();
     }
 
     private void setUpPlayerAndOpponentUI() {
-        UIDrawer.setUpPlayerUI(gameMaster.getPlayer());
-        UIDrawer.setUpOpponentUI(gameMaster.getOpponent());
+        UIDrawHelper.setUpPlayerUI(gameMaster.getPlayer());
+        UIDrawHelper.setUpOpponentUI(gameMaster.getOpponent());
     }
 
     private void showActionSelectDialog() {
@@ -185,7 +208,7 @@ public class BattleActivity extends AppCompatActivity {
                                 gameMaster.getPlayer().setSkillFromUI(checkedItems.get(0));
                                 changeTurnProcess();
                             } else {
-                                UIDrawer.showAlertDialog("スキルがありません", "");
+                                UIDrawHelper.showAlertDialog("スキルがありません", "");
                             }
                         }
                     })
