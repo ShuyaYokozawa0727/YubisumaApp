@@ -17,6 +17,7 @@ import com.example.yubisumaapp.entity.motion.Action;
 import com.example.yubisumaapp.entity.motion.Call;
 import com.example.yubisumaapp.entity.player.GameMaster;
 import com.example.yubisumaapp.entity.player.Player;
+import com.example.yubisumaapp.fragment.BaseCustomDialogFragment;
 import com.example.yubisumaapp.utility.UIDrawHelper;
 
 import java.util.ArrayList;
@@ -35,6 +36,8 @@ public class BattleActivity extends AppCompatActivity {
     private ActivityBattleBinding binding;
     private UIDrawHelper UIDrawHelper;
 
+    private BaseCustomDialogFragment parentCustomDialogFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +45,7 @@ public class BattleActivity extends AppCompatActivity {
         // コンポーネントを自動でバインディングしてくれる偉い人。
         binding = DataBindingUtil.setContentView(this, R.layout.activity_battle);
 
+        parentCustomDialogFragment = new BaseCustomDialogFragment();
         // GameMaster生成
         gameMaster = new GameMaster(playerSize);
         gameMaster.startTurn();
@@ -55,10 +59,11 @@ public class BattleActivity extends AppCompatActivity {
     }
 
     private void changeTurnProcess() {
+        parentCustomDialogFragment.show(getSupportFragmentManager(), "aaa");//setMessage("aa").setTitle("aa")
         gameMaster.startBattle();
         setUpDisplay();
         // ステータスの変化をセット
-        UIDrawHelper.setChangeStatus(gameMaster.getPlayer(), gameMaster.getOpponent());
+        UIDrawHelper.setTurnLog(gameMaster.getTurnCount(), gameMaster.getPlayer(), gameMaster.getOpponent());
         // 終了処理
         gameMaster.endTurn();
 
@@ -83,9 +88,9 @@ public class BattleActivity extends AppCompatActivity {
         }
 
         new AlertDialog.Builder(context)
-                .setTitle("【バトル終了】バトルを再開しますか？")
+                .setTitle("【バトル終了】")
                 .setMessage("勝者は" + message)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                .setPositiveButton("再開する", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Intent intent = getIntent();
@@ -96,10 +101,14 @@ public class BattleActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                 })
-                .setNegativeButton("NO", new DialogInterface.OnClickListener() {
+                .setNegativeButton("終了する", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        // 遷移先のActivityを指定して、Intentを作成する
+                        Intent intent = new Intent(context, MainActivity.class);
+                        // 遷移先のアクティビティを起動させる
+                        startActivity( intent );
+                        finish();
                     }
                 })
                 .setCancelable(false)
@@ -142,6 +151,7 @@ public class BattleActivity extends AppCompatActivity {
                         }
                     })
                     .setNegativeButton("Cancel", UIDrawHelper.fingerCancelListener)
+                    .setCancelable(false)
                     .show();
         }
     };
@@ -172,6 +182,7 @@ public class BattleActivity extends AppCompatActivity {
                     }
                 })
                 .setNegativeButton("Cancel", UIDrawHelper.fingerCancelListener)
+                .setCancelable(false)
                 .show();
     }
 
@@ -193,15 +204,17 @@ public class BattleActivity extends AppCompatActivity {
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            if (!checkedItems.isEmpty()) {
+                            if(gameMaster.getPlayer().isParent && gameMaster.getPlayer().skillPoint == 0) {
+                                UIDrawHelper.showAlertDialog("スキルがありません", "");
+                                UIDrawHelper.initColorSkill();
+                            } else {
                                 gameMaster.getPlayer().setSkillFromUI(checkedItems.get(0));
                                 changeTurnProcess();
-                            } else {
-                                UIDrawHelper.showAlertDialog("スキルがありません", "");
                             }
                         }
                     })
                     .setNegativeButton("Cancel", UIDrawHelper.skillCancelListener)
+                    .setCancelable(false)
                     .show();
         }
     };

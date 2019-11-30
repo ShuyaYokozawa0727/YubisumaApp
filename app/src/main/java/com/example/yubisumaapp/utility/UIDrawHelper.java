@@ -33,6 +33,8 @@ public class UIDrawHelper {
     private Context context;
     private ActivityBattleBinding binding;
 
+    private String logText="";
+
     public UIDrawHelper(Context context, ActivityBattleBinding binding) {
         this.context = context;
         this.binding = binding;
@@ -50,7 +52,7 @@ public class UIDrawHelper {
         binding.fingerUpImageButton.setBackgroundColor(Color.DKGRAY);
     }
 
-    private void initColorSkill() {
+    public void initColorSkill() {
         binding.skillImageButton.setBackgroundColor(Color.DKGRAY);
     }
 
@@ -68,18 +70,18 @@ public class UIDrawHelper {
         }
     };
 
-    public void setChangeStatus(Player player, Player opponent) {
+    public void setTurnLog(int turn, Player player, Player opponent) {
         // ステータスの変化
         int changePlayerFingerStock = player.fingerStock - player.beforeFingerStock;
         int changePlayerSkillPoint = player.skillPoint - player.beforeSkillPoint;
-        String playerChangeStatus = "FS : "+changePlayerFingerStock+"\nSP : "+changePlayerSkillPoint;
-        binding.playerChangeStatusTextView.setText(playerChangeStatus);
         // ステータスの変化
         int changeOpponentFingerStock = opponent.fingerStock - opponent.beforeFingerStock;
         int changeOpponentSkillPoint = opponent.skillPoint - opponent.beforeSkillPoint;
-        String opponentChangeStatus = "FS : "+changeOpponentFingerStock+"\nSP : "+changeOpponentSkillPoint;
-        binding.opponentChangeStatusTextView.setText(opponentChangeStatus);
-
+        // ログをセット
+        String playerChangeStatus = "[P F/S : "+changePlayerFingerStock+"/"+changePlayerSkillPoint+"("+player.getSkillName()+")] ";
+        String opponentChangeStatus = "[O F/S : "+changeOpponentFingerStock+"/"+changeOpponentSkillPoint+"("+opponent.getSkillName()+")]";
+        logText += (turn + ":" + playerChangeStatus+" - "+opponentChangeStatus + "\n") ;
+        binding.logTextView.setText(logText);
     }
 
     public void setUpPlayerUI(Player player) {
@@ -103,7 +105,7 @@ public class UIDrawHelper {
             String text = "";
             if(player.hasCall()) {
                 Call playerCall = (Call)playerMotion;
-                text = "Action : "+ playerCall.getStandCount() + "\nCall : " +playerCall.getCallCount();
+                text = "Action : "+ playerCall.getStandCount() + " / Call : " +playerCall.getCallCount();
             } else if(player.hasAction()) {
                 Action playerAction = (Action)playerMotion;
                 text = "Action : " + playerAction.getStandCount();
@@ -133,7 +135,7 @@ public class UIDrawHelper {
             String text = "";
             if(opponent.hasCall()) {
                 Call opponentCall = (Call)opponentMotion;
-                text = "Action : "+ opponentCall.getStandCount() + "\nCall : " +opponentCall.getCallCount();
+                text = "Action : "+ opponentCall.getStandCount() + " / Call : " +opponentCall.getCallCount();
             } else if(opponent.hasAction()) {
                 Action opponentAction = (Action)opponentMotion;
                 text = "Action : " + opponentAction.getStandCount();

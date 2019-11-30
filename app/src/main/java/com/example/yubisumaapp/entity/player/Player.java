@@ -20,6 +20,8 @@ public class Player {
     public int beforeFingerStock = 0;
     public int beforeSkillPoint = 0;
 
+    ArrayList<Player> LogList = new ArrayList<>();
+
     protected Motion motion;
 
     Player(int skillPoint, int fingerStock, int playerIndex) {
@@ -40,6 +42,7 @@ public class Player {
         }
         beforeFingerStock = this.fingerStock;
         beforeSkillPoint = this.skillPoint;
+        LogList.add(this);
     }
 
     public void battleEnd() {
@@ -113,6 +116,13 @@ public class Player {
 
     public Motion getMotion() {
         return this.motion;
+    }
+    public String getSkillName() {
+        if(hasSkill()) {
+            return ((Skill)motion).getSkillName();
+        } else {
+            return "";
+        }
     }
 
     // オーバーロード
