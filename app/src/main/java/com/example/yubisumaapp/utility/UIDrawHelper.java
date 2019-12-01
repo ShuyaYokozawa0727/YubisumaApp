@@ -47,32 +47,7 @@ public class UIDrawHelper {
 
     /*
      * BattleActivityで使われます
-     *
      */
-    private void initColorFingerUp() {
-        binding.fingerUpImageButton.setBackgroundColor(Color.DKGRAY);
-    }
-
-    public void initColorSkill() {
-        binding.skillImageButton.setBackgroundColor(Color.DKGRAY);
-    }
-
-    public DialogInterface.OnClickListener fingerCancelListener = new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            initColorFingerUp();
-        }
-    };
-
-    public DialogInterface.OnClickListener skillCancelListener = new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialog, int which) {
-            initColorSkill();
-        }
-    };
-
-
-
     // プレイヤーごとではなく、必要なパラメータのみにする
     public void setTurnLog(int turn, Player player, Player opponent) {
         // ステータスの変化
@@ -88,14 +63,10 @@ public class UIDrawHelper {
         binding.logTextView.setText(logText);
     }
 
-
     // プレイヤーごとではなく、必要なパラメータのみにする
     public void setUpPlayerUI(Player player) {
         int fingerStock = player.fingerStock;
         int skillPoint = player.skillPoint;
-        // ボタンの色を初期化
-        initColorFingerUp();
-        initColorSkill();
         // IconListを初期化・セット
         binding.playerFingerStockLayout.removeAllViews();
         binding.playerSkillPointLayout.removeAllViews();

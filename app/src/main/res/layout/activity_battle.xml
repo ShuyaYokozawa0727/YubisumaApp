@@ -97,7 +97,7 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imageView"
-            app:layout_constraintVertical_bias="1.0" />
+            app:layout_constraintVertical_bias="0.0" />
 
         <TextView
             android:id="@+id/playerMotionTextView"
@@ -139,27 +139,36 @@
             app:layout_constraintTop_toBottomOf="@+id/playerSkillPointLayout" />
 
         <ImageButton
-            android:id="@+id/fingerUpImageButton"
+            android:id="@+id/leftFingerImageButton"
             android:layout_width="150dp"
             android:layout_height="0dp"
-            android:background="#000000"
+            android:background="#FFFFFF"
             android:scaleType="fitCenter"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/playerFingerStockLayout"
-            app:srcCompat="@drawable/action"
-            tools:srcCompat="@drawable/action" />
+            app:srcCompat="@drawable/good"/>
 
         <ImageButton
-            android:id="@+id/skillImageButton"
+            android:id="@+id/rightFingerImageButton"
             android:layout_width="150dp"
             android:layout_height="0dp"
-            android:background="#000000"
+            android:background="#FFFFFF"
             android:scaleType="fitCenter"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/playerFingerStockLayout"
-            app:srcCompat="@drawable/skill" />
+            app:srcCompat="@drawable/good_rev" />
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TextView"
+            app:layout_constraintBottom_toBottomOf="@+id/imageView2"
+            app:layout_constraintEnd_toStartOf="@+id/rightFingerImageButton"
+            app:layout_constraintStart_toEndOf="@+id/leftFingerImageButton"
+            app:layout_constraintTop_toBottomOf="@+id/playerFingerStockLayout" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

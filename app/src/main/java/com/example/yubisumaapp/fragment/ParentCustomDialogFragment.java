@@ -20,6 +20,24 @@ import static com.example.yubisumaapp.utility.YubiSumaUtility.createRangeLabel;
 
 public class ParentCustomDialogFragment extends DialogFragment {
 
+    // バンドルから取り出すためのキー
+    private static final String MAX_CALL_COUNT = "maxCallCount";
+    private static final String SKILL_POINT = "skillPoint";
+    private static final String AVAILABLE_SKILL_NAME_ARRAY = "availableSkillNameArray";
+
+    // Activityから取得してくるデータ
+    private int maxCallCount;
+    private int skillPoint;
+    private String[] availableSkillNameArray;
+
+    // Activityに返すデータ
+    private int callCount=0;
+    private int usedSkillIndex=0;
+
+    public Dialog customDialog;
+
+    private ParentCustomDialogFragment.OnFragmentInteractionListener mListener;
+
     // 必要なデータを用意する
     public static ParentCustomDialogFragment newInstance(int maxCallCount, int skillPoint, String[] availableSkillNameArray) {
         // 引数のセット
@@ -33,15 +51,6 @@ public class ParentCustomDialogFragment extends DialogFragment {
         return fragment;
     }
 
-    // バンドルから取り出すためのキー
-    private static final String MAX_CALL_COUNT = "maxCallCount";
-    private static final String SKILL_POINT = "skillPoint";
-    private static final String AVAILABLE_SKILL_NAME_ARRAY = "availableSkillNameArray";
-
-    private int maxCallCount;
-    private int skillPoint;
-    private String[] availableSkillNameArray;
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,8 +60,6 @@ public class ParentCustomDialogFragment extends DialogFragment {
             availableSkillNameArray = getArguments().getStringArray(AVAILABLE_SKILL_NAME_ARRAY);
         }
     }
-
-    public Dialog customDialog;
 
     // ダイアログが表示された時点で呼び出される？？
     @Override
@@ -73,16 +80,13 @@ public class ParentCustomDialogFragment extends DialogFragment {
 
             // ボタンにリスナーをセット
             customDialog.findViewById(R.id.callImageButton).setOnClickListener(callEventListener);
-            customDialog.findViewById(R.id.skillImageButton).setOnClickListener(skillEventListener);
+            customDialog.findViewById(R.id.rightFingerImageButton).setOnClickListener(skillEventListener);
 
             ((TextView)customDialog.findViewById(R.id.titleCustomDialog)).setText("行動を選択してください");
             ((TextView)customDialog.findViewById(R.id.messageCustomDialog)).setText("マイクボタン : コール \n星ボタン : スキル");
         }
         return customDialog;
     }
-
-    private int callCount=0;
-    private int usedSkillIndex=0;
 
     View.OnClickListener callEventListener = new View.OnClickListener() {
         @Override
@@ -133,8 +137,7 @@ public class ParentCustomDialogFragment extends DialogFragment {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (skillPoint == 0) {
-                                // showDialog「選択できません」
-
+                                showAlertDialog("選択できるスキルがありません","てなわけ！");
                             } else {
                                 // メンバ変数に保管
                                 usedSkillIndex = checkedItems.get(0);
@@ -149,7 +152,14 @@ public class ParentCustomDialogFragment extends DialogFragment {
         }
     };
 
-    private ParentCustomDialogFragment.OnFragmentInteractionListener mListener;
+    public void showAlertDialog(String title, String message) {
+        new AlertDialog.Builder(getActivity())
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show();
+    }
+
 
     @Override
     public void onAttach(Context context) {
@@ -162,8 +172,9 @@ public class ParentCustomDialogFragment extends DialogFragment {
         }
     }
 
-    // Acitivityで定義されているonParentCustomDialogFragmentInteractionをフラグメントから実行できる
+    // Activityで定義されているonParentCustomDialogFragmentInteractionをフラグメントから実行できる
     // 多分Activityの値をゲットしてこれんじゃないか？？！？！
+    // 引数にFragmentの値をセットしてあげればActivityに値を返すこともできるね！！素通りだ！
     public void decidedMotion(int mode) {
         customDialog.dismiss();
         if (mListener != null) {

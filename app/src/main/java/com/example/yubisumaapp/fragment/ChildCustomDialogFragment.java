@@ -66,7 +66,7 @@ public class ChildCustomDialogFragment extends DialogFragment {
             customDialog.setContentView(R.layout.dialog_custom_child);
 
             // ボタンにリスナーをセット
-            customDialog.findViewById(R.id.skillImageButton).setOnClickListener(skillEventListener);
+            customDialog.findViewById(R.id.rightFingerImageButton).setOnClickListener(skillEventListener);
 
             ((TextView)customDialog.findViewById(R.id.titleCustomDialog)).setText("行動を選択してください");
             ((TextView)customDialog.findViewById(R.id.messageCustomDialog)).setText("星ボタン : スキル");

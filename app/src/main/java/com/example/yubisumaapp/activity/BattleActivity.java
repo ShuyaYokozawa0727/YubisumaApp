@@ -10,9 +10,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.media.session.PlaybackStateCompat;
+import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 import com.example.yubisumaapp.R;
+import com.example.yubisumaapp.adapter.LongClickRepeatAdapter;
 import com.example.yubisumaapp.databinding.ActivityBattleBinding;
 import com.example.yubisumaapp.entity.motion.Action;
 import com.example.yubisumaapp.entity.motion.Call;
@@ -31,8 +35,6 @@ import static com.example.yubisumaapp.utility.YubiSumaUtility.createNumberLabel;
 import static com.example.yubisumaapp.utility.YubiSumaUtility.createRangeLabel;
 
 public class BattleActivity extends AppCompatActivity implements ParentCustomDialogFragment.OnFragmentInteractionListener, ChildCustomDialogFragment.OnFragmentInteractionListener {
-    public static final int DEFAULT_CHECKED = 0;
-
     private Context context;
     private GameMaster gameMaster;
     private static int playerSize = 2;
@@ -54,7 +56,41 @@ public class BattleActivity extends AppCompatActivity implements ParentCustomDia
         UIDrawHelper = new UIDrawHelper(this, binding);
         setUpDisplay();
 
-        showParentDialogFragment();
+        binding.leftFingerImageButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                // キーから指が離されたら連打をオフにする
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    binding.leftFingerImageButton.setImageResource(R.drawable.good);
+                } else if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    decrement();
+                    binding.leftFingerImageButton.setImageResource(R.drawable.guu);
+                }
+                return false;
+            }
+        });
+
+        binding.rightFingerImageButton.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                // キーから指が離されたら連打をオフにする
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+                    binding.rightFingerImageButton.setImageResource(R.drawable.good_rev);
+                } else if(event.getAction() == MotionEvent.ACTION_DOWN){
+                    decrement();
+                    binding.rightFingerImageButton.setImageResource(R.drawable.guu_rev);
+                }
+                return false;
+            }
+        });
+
+        //LongClickRepeatAdapter.bless(binding.leftFingerImageButton);
+    }
+    int number = 0;
+
+    private void decrement() {
+        number--;
+        binding.textView.setText(String.valueOf(number));
     }
 
     private void showParentDialogFragment() {
@@ -68,10 +104,9 @@ public class BattleActivity extends AppCompatActivity implements ParentCustomDia
     }
 
     private void showChildDialogFragment() {
-        // 親の場合のフラグメントを発射するs
+        // 親の場合のフラグメントを発射する
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         String[] availableSkillNameArray = gameMaster.getPlayer().getAvailableSkillNameArray();
-
         transaction.add(ChildCustomDialogFragment.newInstance(availableSkillNameArray),"a");
         transaction.commit();
     }
@@ -87,6 +122,7 @@ public class BattleActivity extends AppCompatActivity implements ParentCustomDia
         if(gameMaster.inGame) {
             // 次のターン開始
             gameMaster.startTurn();
+            // CustomDialog表示
             if(gameMaster.getPlayer().isParent) {
                 showParentDialogFragment();
             } else {
@@ -135,7 +171,7 @@ public class BattleActivity extends AppCompatActivity implements ParentCustomDia
                 .show();
     }
 
-    public void setUpDisplay() {
+    private void setUpDisplay() {
         UIDrawHelper.setUpPlayerUI(gameMaster.getPlayer());
         UIDrawHelper.setUpOpponentUI(gameMaster.getOpponent());
     }
