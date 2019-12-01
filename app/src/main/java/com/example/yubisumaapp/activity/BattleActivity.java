@@ -3,6 +3,7 @@ package com.example.yubisumaapp.activity;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,9 +16,12 @@ import com.example.yubisumaapp.R;
 import com.example.yubisumaapp.databinding.ActivityBattleBinding;
 import com.example.yubisumaapp.entity.motion.Action;
 import com.example.yubisumaapp.entity.motion.Call;
+import com.example.yubisumaapp.entity.motion.skill.Skill;
+import com.example.yubisumaapp.entity.motion.skill.SkillManager;
 import com.example.yubisumaapp.entity.player.GameMaster;
 import com.example.yubisumaapp.entity.player.Player;
-import com.example.yubisumaapp.fragment.BaseCustomDialogFragment;
+import com.example.yubisumaapp.fragment.ChildCustomDialogFragment;
+import com.example.yubisumaapp.fragment.ParentCustomDialogFragment;
 import com.example.yubisumaapp.utility.UIDrawHelper;
 
 import java.util.ArrayList;
@@ -26,7 +30,7 @@ import java.util.List;
 import static com.example.yubisumaapp.utility.YubiSumaUtility.createNumberLabel;
 import static com.example.yubisumaapp.utility.YubiSumaUtility.createRangeLabel;
 
-public class BattleActivity extends AppCompatActivity {
+public class BattleActivity extends AppCompatActivity implements ParentCustomDialogFragment.OnFragmentInteractionListener, ChildCustomDialogFragment.OnFragmentInteractionListener {
     public static final int DEFAULT_CHECKED = 0;
 
     private Context context;
@@ -36,16 +40,12 @@ public class BattleActivity extends AppCompatActivity {
     private ActivityBattleBinding binding;
     private UIDrawHelper UIDrawHelper;
 
-    private BaseCustomDialogFragment parentCustomDialogFragment;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         context = this;
         // コンポーネントを自動でバインディングしてくれる偉い人。
         binding = DataBindingUtil.setContentView(this, R.layout.activity_battle);
-
-        parentCustomDialogFragment = new BaseCustomDialogFragment();
         // GameMaster生成
         gameMaster = new GameMaster(playerSize);
         gameMaster.startTurn();
@@ -54,23 +54,44 @@ public class BattleActivity extends AppCompatActivity {
         UIDrawHelper = new UIDrawHelper(this, binding);
         setUpDisplay();
 
-        binding.fingerUpImageButton.setOnClickListener(fingerUpEventHandler);
-        binding.skillImageButton.setOnClickListener(skillEventHandler);
+        showParentDialogFragment();
+    }
+
+    private void showParentDialogFragment() {
+        // 親の場合のフラグメントを発射するs
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        int totalFingerCount = gameMaster.getTotalFingerCount();
+        int skillPoint = gameMaster.getPlayer().skillPoint;
+        String[] availableSkillNameArray = gameMaster.getPlayer().getAvailableSkillNameArray();
+        transaction.add(ParentCustomDialogFragment.newInstance(totalFingerCount, skillPoint, availableSkillNameArray),"a");
+        transaction.commit();
+    }
+
+    private void showChildDialogFragment() {
+        // 親の場合のフラグメントを発射するs
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        String[] availableSkillNameArray = gameMaster.getPlayer().getAvailableSkillNameArray();
+
+        transaction.add(ChildCustomDialogFragment.newInstance(availableSkillNameArray),"a");
+        transaction.commit();
     }
 
     private void changeTurnProcess() {
-        parentCustomDialogFragment.show(getSupportFragmentManager(), "aaa");//setMessage("aa").setTitle("aa")
         gameMaster.startBattle();
         setUpDisplay();
         // ステータスの変化をセット
         UIDrawHelper.setTurnLog(gameMaster.getTurnCount(), gameMaster.getPlayer(), gameMaster.getOpponent());
         // 終了処理
         gameMaster.endTurn();
-
         // 開始処理
         if(gameMaster.inGame) {
             // 次のターン開始
             gameMaster.startTurn();
+            if(gameMaster.getPlayer().isParent) {
+                showParentDialogFragment();
+            } else {
+                showChildDialogFragment();
+            }
         } else {
             showResult();
         }
@@ -86,7 +107,6 @@ public class BattleActivity extends AppCompatActivity {
                 message = "俺！！！！１";
             }
         }
-
         new AlertDialog.Builder(context)
                 .setTitle("【バトル終了】")
                 .setMessage("勝者は" + message)
@@ -101,14 +121,14 @@ public class BattleActivity extends AppCompatActivity {
                         startActivity(intent);
                     }
                 })
-                .setNegativeButton("終了する", new DialogInterface.OnClickListener() {
+                .setNeutralButton("終了する", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // 遷移先のActivityを指定して、Intentを作成する
-                        Intent intent = new Intent(context, MainActivity.class);
+                        //Intent intent = new Intent(context, MainActivity.class);
                         // 遷移先のアクティビティを起動させる
-                        startActivity( intent );
-                        finish();
+                        //startActivity( intent );
+                        //finish();
                     }
                 })
                 .setCancelable(false)
@@ -120,102 +140,25 @@ public class BattleActivity extends AppCompatActivity {
         UIDrawHelper.setUpOpponentUI(gameMaster.getOpponent());
     }
 
-    private View.OnClickListener fingerUpEventHandler = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            binding.fingerUpImageButton.setBackgroundColor(Color.YELLOW);
-            final List<Integer> checkedItems = new ArrayList<>();
-            checkedItems.add(DEFAULT_CHECKED);
-            new AlertDialog.Builder(context)
-                    .setTitle("指を上げる数を選択")
-                    .setSingleChoiceItems(createNumberLabel(gameMaster.getPlayer().getMyFingerCount()), DEFAULT_CHECKED, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            checkedItems.clear();
-                            checkedItems.add(which);
-                        }
-                    })
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if (!checkedItems.isEmpty()) {
-                                int actionCount = checkedItems.get(0);
-                                gameMaster.getPlayer().setMotion(new Action(actionCount));
-                                // 親ならコールも
-                                if(gameMaster.getPlayer().isParent) {
-                                    showCallDialog();
-                                } else {
-                                    changeTurnProcess();
-                                }
-                            }
-                        }
-                    })
-                    .setNegativeButton("Cancel", UIDrawHelper.fingerCancelListener)
-                    .setCancelable(false)
-                    .show();
+    @Override
+    public void onParentCustomDialogFragmentInteraction(int motionMode, int callCount, int usedSkillIndex) {
+        // Call
+        if(motionMode == 0){
+            gameMaster.getPlayer().setMotion(new Call(0, callCount));
+        } else if(motionMode == 1){
+            gameMaster.getPlayer().setSkillFromUI(usedSkillIndex);
+        } else {
+            // やばいですよ！
+            throw new IllegalArgumentException("From: BattleActivity.onParentCustomDialogFragmentInteraction\nMotionModeの値が0でも1でもありません。");
         }
-    };
-
-    private void showCallDialog() {
-        final List<Integer> checkedItems = new ArrayList<>();
-        checkedItems.add(DEFAULT_CHECKED);
-        final int minNumber = gameMaster.getPlayer().takeAction().getStandCount();
-        int maxNumber =  gameMaster.getOpponent().getMyFingerCount() + minNumber;
-        new AlertDialog.Builder(context)
-                .setTitle("コールする数を選択")
-                .setSingleChoiceItems(createRangeLabel(minNumber,maxNumber), DEFAULT_CHECKED, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        checkedItems.clear();
-                        checkedItems.add(which);
-                    }
-                })
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if (!checkedItems.isEmpty()) {
-                            int callCount = checkedItems.get(0) + minNumber;
-                            int myFingerUpCount = gameMaster.getPlayer().takeAction().getStandCount();
-                            gameMaster.getPlayer().setMotion(new Call(myFingerUpCount, callCount));
-                            changeTurnProcess();
-                        }
-                    }
-                })
-                .setNegativeButton("Cancel", UIDrawHelper.fingerCancelListener)
-                .setCancelable(false)
-                .show();
+        changeTurnProcess();
     }
 
-    private View.OnClickListener skillEventHandler = new View.OnClickListener() {
-        @Override
-        public void onClick(View view) {
-            final List<Integer> checkedItems = new ArrayList<>();
-            binding.skillImageButton.setBackgroundColor(Color.YELLOW);
-            checkedItems.add(DEFAULT_CHECKED);
-            new AlertDialog.Builder(context)
-                    .setTitle("発動するスキル選択する. \nSP : " + gameMaster.getPlayer().skillPoint)
-                    .setSingleChoiceItems(gameMaster.getPlayer().getAvailableSkillNameArray(), DEFAULT_CHECKED, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            checkedItems.clear();
-                            checkedItems.add(which);
-                        }
-                    })
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if(gameMaster.getPlayer().isParent && gameMaster.getPlayer().skillPoint == 0) {
-                                UIDrawHelper.showAlertDialog("スキルがありません", "");
-                                UIDrawHelper.initColorSkill();
-                            } else {
-                                gameMaster.getPlayer().setSkillFromUI(checkedItems.get(0));
-                                changeTurnProcess();
-                            }
-                        }
-                    })
-                    .setNegativeButton("Cancel", UIDrawHelper.skillCancelListener)
-                    .setCancelable(false)
-                    .show();
+    @Override
+    public void onChildCustomDialogFragmentInteraction(int usedSkillIndex) {
+        if(usedSkillIndex == 0) {
+            gameMaster.getPlayer().setSkillFromUI(usedSkillIndex);
         }
-    };
+        changeTurnProcess();
+    }
 }

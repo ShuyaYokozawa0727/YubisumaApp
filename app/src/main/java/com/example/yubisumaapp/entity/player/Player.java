@@ -79,11 +79,11 @@ public class Player {
             skillNameList.add(skill.getSkillName());
         }
         // 配列に変換
-        String[] activeSkill = new String[skillNameList.size()];
+        String[] activeSkillArray = new String[skillNameList.size()];
         for(int index=0; index<skillList.size(); index++) {
-            activeSkill[index] = skillNameList.get(index);
+            activeSkillArray[index] = skillNameList.get(index);
         }
-        return activeSkill;
+        return activeSkillArray;
     }
 
     public ArrayList<Skill> getAvailableSkillList() {

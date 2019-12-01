@@ -2,6 +2,7 @@ package com.example.yubisumaapp.utility;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -70,6 +71,9 @@ public class UIDrawHelper {
         }
     };
 
+
+
+    // プレイヤーごとではなく、必要なパラメータのみにする
     public void setTurnLog(int turn, Player player, Player opponent) {
         // ステータスの変化
         int changePlayerFingerStock = player.fingerStock - player.beforeFingerStock;
@@ -84,6 +88,8 @@ public class UIDrawHelper {
         binding.logTextView.setText(logText);
     }
 
+
+    // プレイヤーごとではなく、必要なパラメータのみにする
     public void setUpPlayerUI(Player player) {
         int fingerStock = player.fingerStock;
         int skillPoint = player.skillPoint;
@@ -164,7 +170,7 @@ public class UIDrawHelper {
             // ImageViewのインスタンス生成
             ImageView imageView = new ImageView(context);
             // 画像をセット
-            imageView.setImageResource(R.drawable.ic_btn_speak_now);
+            imageView.setImageResource(R.drawable.ic_life_round);
             imageView.setLayoutParams(layoutWCParams);
             // とりあえずリストに追加
             playerFingerStockIconList.add(imageView);
@@ -190,7 +196,7 @@ public class UIDrawHelper {
             // ImageViewのインスタンス生成
             ImageView imageView = new ImageView(context);
             // 画像をセット
-            imageView.setImageResource(R.drawable.ic_btn_speak_now);
+            imageView.setImageResource(R.drawable.ic_life_round);
             imageView.setLayoutParams(layoutWCParams);
             // とりあえずリストに追加
             opponentFingerStockIconList.add(imageView);

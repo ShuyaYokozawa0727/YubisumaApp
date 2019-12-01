@@ -21,7 +21,7 @@
 
         <!-- タイトル -->
         <TextView
-            android:id="@+id/title"
+            android:id="@+id/titleCustomDialog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="#4CAF50"
@@ -38,7 +38,7 @@
         <!-- OK ボタン -->
 
         <TextView
-            android:id="@+id/message"
+            android:id="@+id/messageCustomDialog"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_margin="20dp"
@@ -51,19 +51,7 @@
             android:textSize="16sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/title" />
-
-        <ImageButton
-            android:id="@+id/callImageButton"
-            android:layout_width="140dp"
-            android:layout_height="140dp"
-            android:layout_marginStart="32dp"
-            android:layout_marginLeft="32dp"
-            android:background="#00646464"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/message"
-            app:srcCompat="@drawable/ic_btn_speak_now" />
+            app:layout_constraintTop_toBottomOf="@+id/titleCustomDialog" />
 
         <ImageButton
             android:id="@+id/skillImageButton"
@@ -74,7 +62,8 @@
             android:background="#00FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/message"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/messageCustomDialog"
             app:srcCompat="@drawable/btn_star_big_on" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
