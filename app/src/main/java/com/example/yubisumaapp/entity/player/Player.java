@@ -15,8 +15,6 @@ public class Player {
     public int playerIndex;
     public boolean isParent;
     public boolean isClear = false;
-    private boolean useAction = false;
-
     public int beforeFingerStock = 0;
     public int beforeSkillPoint = 0;
 
@@ -32,7 +30,6 @@ public class Player {
 
     public void turnStart() {
         this.motion = null;
-        useAction = false;
         // 最大値に補正
         if(UIDrawHelper.ICON_SIZE < skillPoint) {
             skillPoint = UIDrawHelper.ICON_SIZE;
@@ -40,23 +37,19 @@ public class Player {
         if(UIDrawHelper.ICON_SIZE < fingerStock) {
             fingerStock = UIDrawHelper.ICON_SIZE;
         }
-        beforeFingerStock = this.fingerStock;
-        beforeSkillPoint = this.skillPoint;
         LogList.add(this);
-    }
-
-    public void battleEnd() {
-        if(hasAction()) {
-            skillPoint++;
-        }
     }
 
     public void turnEnd() {
         isParent = false;
-        // クリアしていない
+        if(!hasSkill()) {
+            skillPoint++;
+        }
+        // クリアしたら
         if(fingerStock <= 0) {
             isClear = true;
         }
+
     }
 
     public void skillResult(boolean isSuccess) {
@@ -106,7 +99,9 @@ public class Player {
         if(isParent) {
             setMotion(SkillManager.attackSkillList.get(skillIndex));
         } else {
-            setMotion(SkillManager.defenceSkillList.get(skillIndex));
+            if(skillIndex != -1) {
+                setMotion(SkillManager.defenceSkillList.get(skillIndex));
+            }
         }
     }
 
@@ -117,6 +112,7 @@ public class Player {
     public Motion getMotion() {
         return this.motion;
     }
+
     public String getSkillName() {
         if(hasSkill()) {
             return ((Skill)motion).getSkillName();
@@ -125,10 +121,19 @@ public class Player {
         }
     }
 
+    public void rememberBeforeStatus() {
+        beforeFingerStock = this.fingerStock;
+        beforeSkillPoint = this.skillPoint;
+    }
+
     // オーバーロード
     public void setMotion(Action action) {
-        useAction = true;
         this.motion = action;
+    }
+
+    // オーバーロード
+    public void setMotion(Call call) {
+        this.motion = call;
     }
 
     // オーバーロード

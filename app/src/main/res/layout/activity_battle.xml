@@ -31,10 +31,10 @@
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginBottom="8dp"
-            app:layout_constraintBottom_toTopOf="@+id/opponentFingerStockLayout"
+            app:layout_constraintBottom_toTopOf="@+id/opponentMotionTextView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/imageView">
+            app:layout_constraintTop_toBottomOf="@+id/opponentSkillPointLayout">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -44,8 +44,10 @@
                 <TextView
                     android:id="@+id/logTextView"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:textSize="8sp" />
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:textSize="10sp" />
             </LinearLayout>
         </ScrollView>
 
@@ -58,9 +60,9 @@
             android:layout_marginEnd="8dp"
             android:layout_marginRight="8dp"
             android:layout_marginBottom="8dp"
-            android:gravity="left"
+            android:gravity="right"
             android:text="Motion"
-            android:textSize="30sp"
+            android:textSize="24sp"
             app:layout_constraintBottom_toBottomOf="@+id/imageView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -69,23 +71,27 @@
             android:id="@+id/opponentSkillPointLayout"
             android:layout_width="0dp"
             android:layout_height="30dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:gravity="right"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toTopOf="@+id/opponentMotionTextView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/opponentFingerStockLayout">
+
+        </LinearLayout>
 
         <LinearLayout
             android:id="@+id/opponentFingerStockLayout"
             android:layout_width="0dp"
             android:layout_height="30dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginTop="8dp"
+            android:gravity="right"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toTopOf="@+id/opponentSkillPointLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/imageView" />
 
         <ImageView
             android:id="@+id/imageView2"
@@ -97,7 +103,7 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imageView"
-            app:layout_constraintVertical_bias="0.0" />
+            app:layout_constraintVertical_bias="1.0" />
 
         <TextView
             android:id="@+id/playerMotionTextView"
@@ -110,7 +116,7 @@
             android:layout_marginRight="8dp"
             android:gravity="left"
             android:text="Motion"
-            android:textSize="30sp"
+            android:textSize="24sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/imageView2" />
@@ -119,56 +125,50 @@
             android:id="@+id/playerSkillPointLayout"
             android:layout_width="0dp"
             android:layout_height="30dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:gravity="left"
             android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@+id/playerFingerStockLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/playerMotionTextView"></LinearLayout>
+            app:layout_constraintStart_toStartOf="parent"></LinearLayout>
 
         <LinearLayout
             android:id="@+id/playerFingerStockLayout"
             android:layout_width="0dp"
             android:layout_height="30dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="@+id/imageView2"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/playerSkillPointLayout" />
-
-        <ImageButton
-            android:id="@+id/leftFingerImageButton"
-            android:layout_width="150dp"
-            android:layout_height="0dp"
-            android:background="#FFFFFF"
-            android:scaleType="fitCenter"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/playerFingerStockLayout"
-            app:srcCompat="@drawable/good"/>
+            app:layout_constraintStart_toStartOf="parent" />
 
         <ImageButton
             android:id="@+id/rightFingerImageButton"
-            android:layout_width="150dp"
+            android:layout_width="160dp"
             android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
             android:background="#FFFFFF"
             android:scaleType="fitCenter"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/playerSkillPointLayout"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/playerFingerStockLayout"
+            app:layout_constraintTop_toBottomOf="@+id/playerMotionTextView"
             app:srcCompat="@drawable/good_rev" />
 
-        <TextView
-            android:id="@+id/textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="TextView"
-            app:layout_constraintBottom_toBottomOf="@+id/imageView2"
-            app:layout_constraintEnd_toStartOf="@+id/rightFingerImageButton"
-            app:layout_constraintStart_toEndOf="@+id/leftFingerImageButton"
-            app:layout_constraintTop_toBottomOf="@+id/playerFingerStockLayout" />
+        <ImageButton
+            android:id="@+id/leftFingerImageButton"
+            android:layout_width="160dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:background="#FFFFFF"
+            android:scaleType="fitCenter"
+            app:layout_constraintBottom_toTopOf="@+id/playerSkillPointLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/playerMotionTextView"
+            app:srcCompat="@drawable/good" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

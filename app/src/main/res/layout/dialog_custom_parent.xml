@@ -26,7 +26,7 @@
             android:layout_height="wrap_content"
             android:background="#4CAF50"
             android:padding="10dp"
-            android:text="Title"
+            android:text="運命の選択"
             android:textColor="@android:color/white"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -37,45 +37,49 @@
 
         <!-- OK ボタン -->
 
-        <TextView
-            android:id="@+id/messageCustomDialog"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="20dp"
-            android:layout_marginTop="52dp"
-            android:layout_marginEnd="208dp"
-            android:layout_marginRight="208dp"
-            android:lineSpacingExtra="6dp"
-            android:text="Message"
-            android:textColor="#333333"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/titleCustomDialog" />
-
         <ImageButton
             android:id="@+id/callImageButton"
-            android:layout_width="140dp"
-            android:layout_height="140dp"
+            android:layout_width="144dp"
+            android:layout_height="144dp"
             android:layout_marginStart="32dp"
             android:layout_marginLeft="32dp"
             android:background="#00646464"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/messageCustomDialog"
+            app:layout_constraintTop_toBottomOf="@+id/titleCustomDialog"
             app:srcCompat="@drawable/ic_btn_speak_now" />
 
         <ImageButton
             android:id="@+id/rightFingerImageButton"
-            android:layout_width="140dp"
-            android:layout_height="140dp"
+            android:layout_width="144dp"
+            android:layout_height="144dp"
             android:layout_marginEnd="32dp"
             android:layout_marginRight="32dp"
             android:background="#00FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/messageCustomDialog"
+            app:layout_constraintTop_toBottomOf="@+id/titleCustomDialog"
             app:srcCompat="@drawable/btn_star_big_on" />
+
+        <TextView
+            android:layout_width="144dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="32dp"
+            android:layout_marginLeft="32dp"
+            android:gravity="center"
+            android:text="コール"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/callImageButton" />
+
+        <TextView
+            android:layout_width="144dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="32dp"
+            android:layout_marginRight="32dp"
+            android:gravity="center"
+            android:text="スキル"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/rightFingerImageButton" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

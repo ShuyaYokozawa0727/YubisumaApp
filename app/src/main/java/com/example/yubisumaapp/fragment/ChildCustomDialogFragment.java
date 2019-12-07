@@ -61,15 +61,11 @@ public class ChildCustomDialogFragment extends DialogFragment {
             customDialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
             // 背景を透明にする
             customDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            this.setCancelable(false);
 
             customDialog.setContentView(R.layout.dialog_custom_child);
 
             // ボタンにリスナーをセット
             customDialog.findViewById(R.id.rightFingerImageButton).setOnClickListener(skillEventListener);
-
-            ((TextView)customDialog.findViewById(R.id.titleCustomDialog)).setText("行動を選択してください");
-            ((TextView)customDialog.findViewById(R.id.messageCustomDialog)).setText("星ボタン : スキル");
         }
         return customDialog;
     }
@@ -88,14 +84,20 @@ public class ChildCustomDialogFragment extends DialogFragment {
                             checkedItems.add(which);
                         }
                     })
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("発動する！", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             usedSkillIndex = checkedItems.get(0);
                             decidedMotion();
                         }
                     })
-                    .setNegativeButton("Cancel", null)
+                    .setNeutralButton("☆チャージ！", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            usedSkillIndex = -1;
+                            decidedMotion();
+                        }
+                    })
                     .setCancelable(false)
                     .show();
         }

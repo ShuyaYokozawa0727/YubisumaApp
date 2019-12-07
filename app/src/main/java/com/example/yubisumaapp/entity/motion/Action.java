@@ -1,7 +1,4 @@
 package com.example.yubisumaapp.entity.motion;
-
-import com.example.yubisumaapp.entity.motion.Motion;
-
 public class Action extends Motion {
     protected int standCount;
 
