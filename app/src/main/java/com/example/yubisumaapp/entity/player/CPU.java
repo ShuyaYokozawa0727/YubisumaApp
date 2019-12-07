@@ -21,15 +21,19 @@ import java.util.Random;
 public class CPU extends Player {
 
     private Random random = new Random();
-    private GameMaster gameMaster;
+    private Player player;
+    private int totalFingerCount;
 
     public CPU(int skillPoint, int fingerStock, int playerIndex) {
         super(skillPoint, fingerStock, playerIndex);
     }
 
-    void createCPUMotion(GameMaster gameMaster) {
-        this.gameMaster = gameMaster;
+    void createCPUMotion(Player player, int totalFingerCount) {
+        this.player = player;
+        this.totalFingerCount = totalFingerCount;
         motion = null;
+        // 直前のステータスを保存
+        rememberBeforeStatus();
         if (isParent) {
             parentMotion();
         }else {
@@ -43,8 +47,8 @@ public class CPU extends Player {
             randomCall();
         } else {
             // ランダムな確率でCallかSkillか
-            boolean isCall = random.nextBoolean();
-            if (isCall) {
+            boolean useCall = random.nextBoolean();
+            if (useCall) {
                 randomCall();
             } else {
                 // 発動可能なSkillをランダムに設定
@@ -55,12 +59,12 @@ public class CPU extends Player {
 
     private void randomCall() {
         // 自分以外の指の本数
-        int othersFingersSize = gameMaster.getTotalFingerCount() - getMyFingerCount();
+        int othersFingersSize = totalFingerCount - getMyFingerCount();
         // 自分が上げる指の本数
         int myStandFingerCount = random.nextInt(getMyFingerCount());
         // コールする数（自分+自分以外の本数を最大値としたランダムな数）
         int myCallCount = myStandFingerCount + random.nextInt(othersFingersSize);
-        this.setMotion(new Call(myStandFingerCount, myCallCount));
+        this.setMotion(new Call(new Action(myStandFingerCount), myCallCount));
     }
 
     private void randomSkill() {
@@ -71,7 +75,7 @@ public class CPU extends Player {
 
     private void childMotion() {
         // もし今の親のスキルポイントが0ならば
-        if(searchParentPlayer().skillPoint == 0) {
+        if(player.skillPoint == 0) {
             this.setMotion(new Action(random.nextInt(getMyFingerCount())));
         } else  {
             // 今の親のスキルポイントが1以上
@@ -83,16 +87,5 @@ public class CPU extends Player {
                 this.setMotion(SkillManager.defenceSkillList.get(SkillManager.TRAP));
             }
         }
-    }
-
-    private Player searchParentPlayer() {
-        // 親のskillPoint, fingerStockを取得
-        Player parent = null;
-        for(Player otherPlayer : gameMaster.getPlayers()) {
-            if(otherPlayer.isParent) {
-                parent = otherPlayer;
-            }
-        }
-        return parent;
     }
 }

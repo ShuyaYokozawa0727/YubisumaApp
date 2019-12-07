@@ -6,6 +6,7 @@ import com.example.yubisumaapp.entity.motion.skill.Trap;
 
 import java.util.ArrayList;
 import java.util.EventListener;
+import java.util.Random;
 
 public class GameMaster {
     private int turnCount = 0; // ターン開始時にインクリメント
@@ -23,13 +24,15 @@ public class GameMaster {
     public GameMaster(int playerSizeAtStart) {
         this.playerSizeAtStart = playerSizeAtStart;
         createPlayers(playerSizeAtStart);
-        //parentPlayerIndex = new Random().nextInt(playerSize);
-        players.get(parentPlayerIndex).isParent = true;
-    }
+        // 0が子, 1が親
+        parentPlayerIndex = 1;//new Random().nextInt(playerSizeAtStart);
+        setupNextTurn();
+     }
 
     // Activityから呼び出される？
-    public void startTurn() {
+    public void setupNextTurn() {
         turnCount++;
+        findNextParent();
         // プレイヤー達の開始処理
         for(Player player : players) {
             player.turnStart();
@@ -40,19 +43,12 @@ public class GameMaster {
 
     // これはActivityでPlayerのMotionが確定したら呼び出される
     public void startBattle() {
-        Log.v("GameMaster.startBattle", "バトルスタート");
         determineCPUMotion();
         // 親がどんな動きをしたか
         if(parentPlayer.hasCall()) {
             parentCallProcess();
         } else if (parentPlayer.hasSkill()) {
             parentSkillProcess();
-        } else {
-            // これはおかしいけどめっちゃ来そう
-            Log.v("うわああ", "現在の親のMotionがCallでもSkillでもない。。。");
-        }
-        for(Player player : players) {
-            player.battleEnd();
         }
     }
 
@@ -60,31 +56,34 @@ public class GameMaster {
         for(Player player : players) {
             player.turnEnd();
         }
+    }
+
+    public void checkPlayers() {
+        // プレイヤーがクリアしたかチェック
         for(Player player : players) {
-            if(player.isClear) {
-                clearPlayers.add(player);
-            }
+            if(player.isClear) clearPlayers.add(player);
         }
+        // クリアしたプレイヤーを削除
         for(Player clearPlayer : clearPlayers) {
             players.remove(clearPlayer);
         }
         if(clearPlayers.size() == playerSizeAtStart-1) {
             inGame = false;
-        } else {
-            findNextParent();
         }
     }
 
     private void findNextParent() {
-        int nextParentIndex = parentPlayerIndex = (parentPlayerIndex+1) % players.size();
+        parentPlayerIndex = (parentPlayerIndex+1) % players.size();
         for(Player player : players) {
-            if(player.playerIndex == nextParentIndex) {
+            if(player.playerIndex == parentPlayerIndex) {
                 if(player.isClear) {
-                    // 再起？
+                    // 複数プレイヤー対応したらどうなるかな～
                     findNextParent();
                 } else {
-                    player.isParent=true;
+                    player.isParent = true;
                 }
+            } else {
+                player.isParent = false;
             }
         }
     }
@@ -92,9 +91,8 @@ public class GameMaster {
     // 一人対戦
     // プレイヤーを作成する
     private void createPlayers(int playerSize) {
-        int skillPoint = 1; // TODO: 0で始めるとバグる(初手で土踏まず使える)
+        int skillPoint = 1;
         int fingerCount = 2;
-
         players.add(new Player(skillPoint, fingerCount, 0));
         for(int index=1; index < playerSize; index++) {
             players.add(new CPU(skillPoint, fingerCount, index));
@@ -116,14 +114,9 @@ public class GameMaster {
     // CPUのMotionを決定する
     private void determineCPUMotion() {
         // CPUのMotionを決定する
-        for(Player otherPlayer : players) {
-            // 自分以外
-            if (!otherPlayer.equals(getPlayer())) {
-                CPU cpu = (CPU) otherPlayer;
-                cpu.createCPUMotion(this);
-                Log.v("CPU", cpu.toString());
-            }
-        }
+        CPU cpu = (CPU) getOpponent();
+        cpu.createCPUMotion(getPlayer(), totalFingerCount);
+        Log.v("CPU", cpu.toString());
     }
 
     // parentがCallだったときの処理
@@ -156,7 +149,7 @@ public class GameMaster {
         parentPlayer.skillResult(isSuccess);
     }
 
-    // 自分を見つける
+    // Playerは必ずindex = 0
     public Player getPlayer() {
         return players.get(0);
     }

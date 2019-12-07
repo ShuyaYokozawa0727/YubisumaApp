@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -16,6 +17,7 @@ import com.example.yubisumaapp.entity.motion.Action;
 import com.example.yubisumaapp.entity.motion.Call;
 import com.example.yubisumaapp.entity.motion.Motion;
 import com.example.yubisumaapp.entity.motion.skill.Skill;
+import com.example.yubisumaapp.entity.player.CPU;
 import com.example.yubisumaapp.entity.player.Player;
 
 import java.util.ArrayList;
@@ -48,6 +50,52 @@ public class UIDrawHelper {
     /*
      * BattleActivityで使われます
      */
+
+    public void checkFingerStock(int fingerStock) {
+        // 2以下
+        if(fingerStock <= 1) {
+            binding.leftFingerImageButton.setVisibility(View.INVISIBLE);
+        } else {
+            binding.leftFingerImageButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    public void setUpUI(ArrayList<Player> players) {
+        // アイコン初期化
+        binding.playerFingerStockLayout.removeAllViews();
+        binding.playerSkillPointLayout.removeAllViews();
+        binding.opponentFingerStockLayout.removeAllViews();
+        binding.opponentSkillPointLayout.removeAllViews();
+        for(Player player : players) {
+            int fingerStock = player.fingerStock;
+            int skillPoint = player.skillPoint;
+            // モーションログテキストを初期化・セット
+            String text = "";
+            if(player.getMotion()!=null) {
+                if(player.hasAction()) {
+                    Action playerAction = (Action)  player.getMotion();
+                    text = "Action : " + playerAction.getStandCount();
+                } else if(player.hasCall()) {
+                    Call playerCall = (Call) player.getMotion();
+                    text = "Action : "+ playerCall.getAction().getStandCount() + " / Call : " +playerCall.getCallCount();
+                } else if(player.hasSkill()) {
+                    Skill playerSkill = (Skill) player.getMotion();
+                    text = "Skill : " + playerSkill.getSkillName();
+                }
+            }
+            // アイコンをセットする
+            if(player instanceof CPU) {
+                binding.opponentMotionTextView.setText(text);
+                for(int index=0; index < fingerStock; index++) binding.opponentFingerStockLayout.addView(opponentFingerStockIconList.get(index));
+                for(int index=0; index < skillPoint; index++) binding.opponentSkillPointLayout.addView(opponentSkillPointIconList.get(index));
+            } else {
+                binding.playerMotionTextView.setText(text);
+                for(int index=0; index < fingerStock; index++) binding.playerFingerStockLayout.addView(playerFingerStockIconList.get(index));
+                for(int index=0; index < skillPoint; index++) binding.playerSkillPointLayout.addView(playerSkillPointIconList.get(index));
+            }
+        }
+    }
+
     // プレイヤーごとではなく、必要なパラメータのみにする
     public void setTurnLog(int turn, Player player, Player opponent) {
         // ステータスの変化
@@ -56,72 +104,11 @@ public class UIDrawHelper {
         // ステータスの変化
         int changeOpponentFingerStock = opponent.fingerStock - opponent.beforeFingerStock;
         int changeOpponentSkillPoint = opponent.skillPoint - opponent.beforeSkillPoint;
-        // ログをセット
-        String playerChangeStatus = "[P F/S : "+changePlayerFingerStock+"/"+changePlayerSkillPoint+"("+player.getSkillName()+")] ";
-        String opponentChangeStatus = "[O F/S : "+changeOpponentFingerStock+"/"+changeOpponentSkillPoint+"("+opponent.getSkillName()+")]";
-        logText += (turn + ":" + playerChangeStatus+" - "+opponentChangeStatus + "\n") ;
+        // ログをセット(DBを意識！)
+        String playerChangeStatus = "P_"+player.getSkillName()+"_"+player.fingerStock+"_"+player.skillPoint+"_"+changePlayerFingerStock+"_"+changePlayerSkillPoint;
+        String opponentChangeStatus = "O_"+opponent.getSkillName()+"_"+opponent.fingerStock+"_"+opponent.skillPoint+"_"+changeOpponentFingerStock+"_"+changeOpponentSkillPoint;
+        logText += (turn + "," + playerChangeStatus+","+opponentChangeStatus + "\n") ;
         binding.logTextView.setText(logText);
-    }
-
-    // プレイヤーごとではなく、必要なパラメータのみにする
-    public void setUpPlayerUI(Player player) {
-        int fingerStock = player.fingerStock;
-        int skillPoint = player.skillPoint;
-        // IconListを初期化・セット
-        binding.playerFingerStockLayout.removeAllViews();
-        binding.playerSkillPointLayout.removeAllViews();
-        for(int index=0; index < fingerStock; index++) {
-            binding.playerFingerStockLayout.addView(playerFingerStockIconList.get(index));
-        }
-        for(int index=0; index < skillPoint; index++) {
-            binding.playerSkillPointLayout.addView(playerSkillPointIconList.get(index));
-        }
-        // モーションテキストを初期化・セット
-        if(player.getMotion()!=null) {
-            Motion playerMotion = player.getMotion();
-            String text = "";
-            if(player.hasCall()) {
-                Call playerCall = (Call)playerMotion;
-                text = "Action : "+ playerCall.getStandCount() + " / Call : " +playerCall.getCallCount();
-            } else if(player.hasAction()) {
-                Action playerAction = (Action)playerMotion;
-                text = "Action : " + playerAction.getStandCount();
-            } else if(player.hasSkill()) {
-                Skill playerSkill = (Skill)playerMotion;
-                text = "Skill : " + playerSkill.getSkillName();
-            }
-            binding.playerMotionTextView.setText(text);
-        }
-    }
-
-    public void setUpOpponentUI(Player opponent) {
-        int fingerStock = opponent.fingerStock;
-        int skillPoint = opponent.skillPoint;
-
-        // アイコンの初期化
-        binding.opponentFingerStockLayout.removeAllViews();
-        binding.opponentSkillPointLayout.removeAllViews();
-        for(int index=0; index < fingerStock; index++) {
-            binding.opponentFingerStockLayout.addView(opponentFingerStockIconList.get(index));
-        }
-        for(int index=0; index < skillPoint; index++) {
-            binding.opponentSkillPointLayout.addView(opponentSkillPointIconList.get(index));
-        }
-        if(opponent.getMotion()!=null) {
-            Motion opponentMotion = opponent.getMotion();
-            String text = "";
-            if(opponent.hasCall()) {
-                Call opponentCall = (Call)opponentMotion;
-                text = "Action : "+ opponentCall.getStandCount() + " / Call : " +opponentCall.getCallCount();
-            } else if(opponent.hasAction()) {
-                Action opponentAction = (Action)opponentMotion;
-                text = "Action : " + opponentAction.getStandCount();
-            } else if(opponent.hasSkill()) {
-                Skill opponentSkill = (Skill)opponentMotion;
-                text = "Skill : " + opponentSkill.getSkillName();
-            }
-            binding.opponentMotionTextView.setText(text);
-        }
     }
 
     public void showAlertDialog(String title, String message) {

@@ -31,8 +31,7 @@ public class ParentCustomDialogFragment extends DialogFragment {
     private String[] availableSkillNameArray;
 
     // Activityに返すデータ
-    private int callCount=0;
-    private int usedSkillIndex=0;
+    private int motionCount=0;
 
     public Dialog customDialog;
 
@@ -67,23 +66,19 @@ public class ParentCustomDialogFragment extends DialogFragment {
         customDialog = null;
         if (getActivity() != null) {
             customDialog = new Dialog(getActivity());
-
             // タイトル非表示
             customDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
             // フルスクリーン
             customDialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
             // 背景を透明にする
             customDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-            this.setCancelable(false);
+            //this.setCancelable(false);
 
             customDialog.setContentView(R.layout.dialog_custom_parent);
 
             // ボタンにリスナーをセット
             customDialog.findViewById(R.id.callImageButton).setOnClickListener(callEventListener);
             customDialog.findViewById(R.id.rightFingerImageButton).setOnClickListener(skillEventListener);
-
-            ((TextView)customDialog.findViewById(R.id.titleCustomDialog)).setText("行動を選択してください");
-            ((TextView)customDialog.findViewById(R.id.messageCustomDialog)).setText("マイクボタン : コール \n星ボタン : スキル");
         }
         return customDialog;
     }
@@ -102,18 +97,18 @@ public class ParentCustomDialogFragment extends DialogFragment {
                             checkedItems.add(which);
                         }
                     })
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("コール！", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (!checkedItems.isEmpty()) {
                                 // callCountをActivityに戻す
-                                callCount = checkedItems.get(0);
+                                motionCount = checkedItems.get(0);
                                 // 0: Callモード
                                 decidedMotion(0);
                             }
                         }
                     })
-                    .setNegativeButton("Cancel", null)
+                    .setNegativeButton("戻る", null)
                     .setCancelable(false)
                     .show();
         }
@@ -133,20 +128,20 @@ public class ParentCustomDialogFragment extends DialogFragment {
                             checkedItems.add(which);
                         }
                     })
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("発動！", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             if (skillPoint == 0) {
-                                showAlertDialog("選択できるスキルがありません","てなわけ！");
+                                showAlertDialog("選択できるスキルがありません","てなわけで！ごめんね！");
                             } else {
                                 // メンバ変数に保管
-                                usedSkillIndex = checkedItems.get(0);
+                                motionCount = checkedItems.get(0);
                                 // 1: Skillモード
                                 decidedMotion(1);
                             }
                         }
                     })
-                    .setNegativeButton("Cancel", null)
+                    .setNegativeButton("戻る", null)
                     .setCancelable(false)
                     .show();
         }
@@ -159,7 +154,6 @@ public class ParentCustomDialogFragment extends DialogFragment {
                 .setPositiveButton("OK", null)
                 .show();
     }
-
 
     @Override
     public void onAttach(Context context) {
@@ -178,15 +172,16 @@ public class ParentCustomDialogFragment extends DialogFragment {
     public void decidedMotion(int mode) {
         customDialog.dismiss();
         if (mListener != null) {
-            mListener.onParentCustomDialogFragmentInteraction(mode, callCount, usedSkillIndex);
+            mListener.onParentCustomDialogFragmentInteraction(mode, motionCount);
         }
     }
+
 
     // こいつをActivityで継承して
     // onParentCustomDialogFragmentInteractionをOverrideする
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onParentCustomDialogFragmentInteraction(int motionMode, int callCount, int usedSkillIndex);
+        void onParentCustomDialogFragmentInteraction(int motionMode, int motionCount);
     }
 
     @Override
