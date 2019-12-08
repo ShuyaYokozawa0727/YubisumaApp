@@ -4,25 +4,21 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
+
 import androidx.appcompat.app.AlertDialog;
-import androidx.fragment.app.DialogFragment;
 import com.example.yubisumaapp.R;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ChildCustomDialogFragment extends DialogFragment {
+public class ChildCustomDialogFragment extends BaseCustomDialogFragment {
 
     // バンドルから取り出すためのキー
     private static final String AVAILABLE_SKILL_NAME_ARRAY = "availableSkillNameArray";
 
     private ChildCustomDialogFragment.OnFragmentInteractionListener mListener;
-
-    public Dialog customDialog;
 
     private String[] availableSkillNameArray;
 
@@ -47,59 +43,79 @@ public class ChildCustomDialogFragment extends DialogFragment {
         }
     }
 
-    // ダイアログが表示された時点で呼び出される？？
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
-        customDialog = null;
-        if (getActivity() != null) {
-            customDialog = new Dialog(getActivity());
-
-            // タイトル非表示
-            customDialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-            // フルスクリーン
-            customDialog.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
-            // 背景を透明にする
-            customDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-
-            customDialog.setContentView(R.layout.dialog_custom_child);
-
-            // ボタンにリスナーをセット
-            customDialog.findViewById(R.id.rightFingerImageButton).setOnClickListener(skillEventListener);
-        }
+        super.onCreateDialog(savedInstanceState);
+        // ボタンにリスナーをセット
+        customDialog.setContentView(R.layout.dialog_custom_child);
+        customDialog.findViewById(R.id.skillImageButton).setOnTouchListener(skillEventListener);
+        customDialog.findViewById(R.id.chargeImageButton).setOnTouchListener(chargeEventListener);
         return customDialog;
     }
 
-    View.OnClickListener skillEventListener = new View.OnClickListener() {
+    private View.OnTouchListener chargeEventListener = new View.OnTouchListener() {
         @Override
-        public void onClick(View view) {
-            final List<Integer> checkedItems = new ArrayList<>();
-            checkedItems.add(0);
-            new AlertDialog.Builder(getActivity())
-                    .setTitle("行動選択")
-                    .setMessage("☆チャージはスキルを発動しません\nトラップを発動すると☆はチャージされません")
-                    .setSingleChoiceItems(availableSkillNameArray, 0, new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            checkedItems.clear();
-                            checkedItems.add(which);
-                        }
-                    })
-                    .setPositiveButton("トラップを発動！", new DialogInterface.OnClickListener() {
+        public boolean onTouch(View view, MotionEvent event) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                customDialog.findViewById(R.id.chargeImageButton).setBackgroundColor(0xFFCCFF90);
+            } else if(event.getAction() == MotionEvent.ACTION_UP) {
+                customDialog.findViewById(R.id.chargeImageButton).setBackgroundColor(Color.WHITE);
+                final List<Integer> checkedItems = new ArrayList<>();
+                checkedItems.add(0);
+                new AlertDialog.Builder(getActivity())
+                        .setTitle("☆チャージ")
+                        .setMessage("☆1 チャージ！")
+                        .setSingleChoiceItems(availableSkillNameArray, 0, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                checkedItems.clear();
+                                checkedItems.add(which);
+                            }
+                        })
+                        .setPositiveButton("チャージ！", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                usedSkillIndex = -1;
+                                decidedMotion();
+                            }
+                        })
+                        .show();
+            }
+            return false;
+        }
+    };
 
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            usedSkillIndex = checkedItems.get(0);
-                            decidedMotion();
-                        }
-                    })
-                    .setNeutralButton("☆チャージ！", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            usedSkillIndex = -1;
-                            decidedMotion();
-                        }
-                    })
-                    .show();
+    private View.OnTouchListener skillEventListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View view, MotionEvent event) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                customDialog.findViewById(R.id.skillImageButton).setBackgroundColor(0xFFCCFF90);
+
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                customDialog.findViewById(R.id.skillImageButton).setBackgroundColor(Color.WHITE);
+
+                final List<Integer> checkedItems = new ArrayList<>();
+                checkedItems.add(0);
+                new AlertDialog.Builder(getActivity())
+                        .setTitle("スキル選択")
+                        .setMessage("◆トラップ: 敵のスキルを反射します")
+                        .setSingleChoiceItems(availableSkillNameArray, 0, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                checkedItems.clear();
+                                checkedItems.add(which);
+                            }
+                        })
+                        .setPositiveButton("スキルを発動！", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                usedSkillIndex = checkedItems.get(0);
+                                decidedMotion();
+                            }
+                        })
+                        .show();
+            }
+            return false;
         }
     };
 
@@ -117,13 +133,13 @@ public class ChildCustomDialogFragment extends DialogFragment {
     public void decidedMotion() {
         customDialog.dismiss();
         if (mListener != null) {
-            mListener.onChildCustomDialogFragmentInteraction(usedSkillIndex);
+            mListener.onDecidedChildMotion(usedSkillIndex);
         }
     }
 
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onChildCustomDialogFragmentInteraction(int usedSkillIndex);
+        void onDecidedChildMotion(int usedSkillIndex);
     }
 
     @Override

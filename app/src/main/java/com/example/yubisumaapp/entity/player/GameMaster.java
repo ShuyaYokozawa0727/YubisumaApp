@@ -23,21 +23,22 @@ public class GameMaster {
         this.playerSizeAtStart = playerSizeAtStart;
         createPlayers(playerSizeAtStart);
         // 0が子, 1が親
-        parentPlayerIndex = 1;//new Random().nextInt(playerSizeAtStart);
-        setupNextTurn();
+        parentPlayerIndex = 0;//new Random().nextInt(playerSizeAtStart);
+        setupNewTurn();
      }
     // 一人対戦
     // プレイヤーを作成する
     private void createPlayers(int playerSize) {
-        int skillPoint = 2;
-        int fingerCount = 5;
+        int skillPoint = 0;
+        int fingerCount = 1;
         players.add(new Player(skillPoint, fingerCount, 0));
-        for(int index=1; index < playerSize; index++) {
+        players.add(new CPU(skillPoint, 3, 1));
+        /*for(int index=1; index < playerSize; index++) {
             players.add(new CPU(skillPoint, fingerCount, index));
-        }
+        }*/
     }
     // Activityから呼び出される？
-    public void setupNextTurn() {
+    public void setupNewTurn() {
         turnCount++;
         findNextParent();
         // プレイヤー達の開始処理
@@ -49,7 +50,7 @@ public class GameMaster {
     }
 
     // これはActivityでPlayerのMotionが確定したら呼び出される
-    public void startBattle() {
+    public void createResult() {
         determineCPUMotion();
         // 親がどんな動きをしたか
         if(parentPlayer.hasCall()) {
@@ -65,7 +66,7 @@ public class GameMaster {
         }
     }
 
-    public void checkPlayers() {
+    public void checkGameEnd() {
         // プレイヤーがクリアしたかチェック
         for(Player player : players) {
             if(player.isClear) clearPlayers.add(player);

@@ -23,13 +23,14 @@ public class Player {
     protected Motion motion;
 
     Player(int skillPoint, int fingerStock, int playerIndex) {
-        this.skillPoint = skillPoint;
-        this.fingerStock = fingerStock;
+        this.skillPoint = this.beforeSkillPoint = skillPoint;
+        this.fingerStock = this.beforeFingerStock = fingerStock;
         this.playerIndex = playerIndex;
     }
 
     public void turnStart() {
         this.motion = null;
+        rememberBeforeStatus();
         LogList.add(this);
     }
 
@@ -38,7 +39,6 @@ public class Player {
         if(!hasSkill()) {
             skillPoint++;
         }
-
         // 最大値に補正
         if(UIDrawHelper.ICON_SIZE < skillPoint) {
             skillPoint = UIDrawHelper.ICON_SIZE;
@@ -50,7 +50,6 @@ public class Player {
         if(fingerStock <= 0) {
             isClear = true;
         }
-
     }
 
     public void skillResult(boolean isSuccess) {
@@ -97,6 +96,7 @@ public class Player {
     }
 
     public void setSkillFromUI(int skillIndex) {
+        // 前のターンでのステータスを保存
         if(isParent) {
             setMotion(SkillManager.attackSkillList.get(skillIndex));
         } else {
@@ -125,6 +125,15 @@ public class Player {
     public void rememberBeforeStatus() {
         beforeFingerStock = this.fingerStock;
         beforeSkillPoint = this.skillPoint;
+    }
+
+
+    public int getChangeFingerStock() {
+        return this.fingerStock - this.beforeFingerStock;
+    }
+
+    public int getChangeSkillPoint() {
+        return this.skillPoint - this.beforeSkillPoint;
     }
 
     // オーバーロード

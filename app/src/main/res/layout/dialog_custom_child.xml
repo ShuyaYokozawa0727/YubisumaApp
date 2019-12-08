@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="405dp"
-        android:layout_height="303dp"
+        android:layout_width="400dp"
+        android:layout_height="240dp"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="6dp"
         android:layout_marginTop="7dp"
@@ -23,7 +24,7 @@
             android:layout_height="wrap_content"
             android:background="#4CAF50"
             android:padding="10dp"
-            android:text="運命の選択"
+            android:text="相手のターン"
             android:textColor="@android:color/white"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -31,25 +32,44 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageButton
-            android:id="@+id/rightFingerImageButton"
+            android:id="@+id/skillImageButton"
             android:layout_width="144dp"
             android:layout_height="144dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
             android:background="#00FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/titleCustomDialog"
-            app:srcCompat="@android:drawable/sym_def_app_icon" />
+            app:srcCompat="@drawable/btn_star_big_on" />
 
         <TextView
             android:layout_width="144dp"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="行動"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.501"
+            android:text="スキル発動！"
+            app:layout_constraintEnd_toEndOf="@+id/skillImageButton"
+            app:layout_constraintTop_toTopOf="@+id/skillImageButton" />
+
+        <ImageButton
+            android:id="@+id/chargeImageButton"
+            android:layout_width="144dp"
+            android:layout_height="144dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:background="#00FFFFFF"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/rightFingerImageButton" />
+            app:layout_constraintTop_toBottomOf="@+id/titleCustomDialog"
+            app:srcCompat="@drawable/charge" />
+
+        <TextView
+            android:layout_width="144dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="☆チャージ！"
+            app:layout_constraintStart_toStartOf="@+id/chargeImageButton"
+            app:layout_constraintTop_toTopOf="@+id/chargeImageButton" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

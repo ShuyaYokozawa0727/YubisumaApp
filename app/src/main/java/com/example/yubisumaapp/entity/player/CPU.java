@@ -32,8 +32,6 @@ public class CPU extends Player {
         this.player = player;
         this.totalFingerCount = totalFingerCount;
         motion = null;
-        // 直前のステータスを保存
-        rememberBeforeStatus();
         if (isParent) {
             parentMotion();
         }else {

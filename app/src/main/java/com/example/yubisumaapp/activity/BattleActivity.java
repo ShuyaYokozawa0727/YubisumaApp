@@ -10,7 +10,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.Handler;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -22,10 +21,16 @@ import com.example.yubisumaapp.entity.player.GameMaster;
 import com.example.yubisumaapp.entity.player.Player;
 import com.example.yubisumaapp.fragment.ChildCustomDialogFragment;
 import com.example.yubisumaapp.fragment.ParentCustomDialogFragment;
+import com.example.yubisumaapp.fragment.ResultCustomDialogFragment;
 import com.example.yubisumaapp.utility.UIDrawHelper;
 
-public class BattleActivity extends AppCompatActivity implements ParentCustomDialogFragment.OnFragmentInteractionListener, ChildCustomDialogFragment.OnFragmentInteractionListener {
-
+public class BattleActivity
+        extends AppCompatActivity
+        implements ParentCustomDialogFragment.OnFragmentInteractionListener
+        ,          ChildCustomDialogFragment.OnFragmentInteractionListener
+        ,          ResultCustomDialogFragment.OnFragmentInteractionListener
+{
+    // こっから本文
     private GameMaster gameMaster;
     private static int playerSize = 2;
 
@@ -48,9 +53,12 @@ public class BattleActivity extends AppCompatActivity implements ParentCustomDia
 
         // GameMaster生成
         gameMaster = new GameMaster(playerSize);
-
-        // UIのセットアップ
+        // UIDrawHelper生成
         UIDrawHelper = new UIDrawHelper(this, binding);
+
+        // UI関係のセットアップ
+        leftFinger = UIDrawHelper.checkFingerStock(gameMaster.getPlayer().fingerStock);
+        UIDrawHelper.setUpUI(gameMaster.getPlayers());
 
         // 音声ファイルをロード
         soundOne = MediaPlayer.create(this, R.raw.conch1);
@@ -61,12 +69,21 @@ public class BattleActivity extends AppCompatActivity implements ParentCustomDia
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 // キーから指が離されたら連打をオフにする
-                if(event.getAction() == MotionEvent.ACTION_DOWN){
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     leftFinger = 0;
                     binding.leftFingerImageButton.setImageResource(R.drawable.guu);
+                    if (!playingSound) {
+                        binding.wantToDoLeftTextView.setText("");
+                    }
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     leftFinger = 1;
                     binding.leftFingerImageButton.setImageResource(R.drawable.good);
+                    if (!playingSound) {
+                        // 非表示ではなければ
+                        if (binding.leftFingerImageButton.getVisibility() != View.INVISIBLE) {
+                            binding.wantToDoLeftTextView.setText("タップしてスタート！");
+                        }
+                    }
                 }
                 return false;
             }
@@ -79,9 +96,17 @@ public class BattleActivity extends AppCompatActivity implements ParentCustomDia
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     rightFinger = 0;
                     binding.rightFingerImageButton.setImageResource(R.drawable.guu_rev);
+                    if(!playingSound) {
+                        binding.wantToDoRightTextView.setText("");
+                    }
                 } else if(event.getAction() == MotionEvent.ACTION_UP){
                     rightFinger = 1;
                     binding.rightFingerImageButton.setImageResource(R.drawable.good_rev);
+                    if(!playingSound) {
+                        if(binding.rightFingerImageButton.getVisibility() != View.INVISIBLE) {
+                            binding.wantToDoRightTextView.setText("タップしてスタート！");
+                        }
+                    }
                 }
 
                 /* この辺結構めんどいな整理しよう */
@@ -97,7 +122,8 @@ public class BattleActivity extends AppCompatActivity implements ParentCustomDia
                     } else if(binding.rightFingerImageButton.getVisibility() == View.INVISIBLE) {
                         if (leftFinger==0 && leaveFingers) {
                             showDialog = true;
-                        }if (leftFinger==1) {
+                        }
+                        if (leftFinger==1) {
                             leaveFingers = true;
                         }
                     } else {
@@ -121,40 +147,31 @@ public class BattleActivity extends AppCompatActivity implements ParentCustomDia
         soundOne.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
-                // 音声再生
+                // 音声終了
+                playingSound = false;
+                // シンバル再生
                 soundTwo.start();
+
                 // Actionだけがここで決定する
+                // TODO: addActionとかでリファクタリング（CPU側も）
                 Action action = new Action(rightFinger+leftFinger);
                 if (gameMaster.getPlayer().getMotion() == null) {
+                    // 子だったらActionだけセット
                     gameMaster.getPlayer().setMotion(action);
                 } else if(gameMaster.getPlayer().hasCall()) {
+                    // CallしてたらActionを組み込む
                     gameMaster.getPlayer().getCall().setAction(action);
                 }
-                // バトル開始
-                gameMaster.startBattle();
-                changeTurn();
+
+                // リザルト作成
+                gameMaster.createResult();
+                // この時点でターン終了
+                gameMaster.endTurn();
+
+                // リザルト表示(フラグメント)
+                showResultDialogFragment();
             }
         });
-        // ディスプレイ表示処理
-        UIDrawHelper.setUpUI(gameMaster.getPlayers());
-    }
-
-    private void changeTurn() {
-        // ターンエンド
-        playingSound = false;
-        gameMaster.endTurn();
-        // 変化後のステータスをUIに反映(引数リファクタリング候補)
-        UIDrawHelper.setUpUI(gameMaster.getPlayers());
-        leftFinger = UIDrawHelper.checkFingerStock(gameMaster.getPlayer().fingerStock);
-        UIDrawHelper.setTurnLog(gameMaster.getTurnCount(), gameMaster.getPlayer(), gameMaster.getOpponent());
-        // ゲーム終了チェック
-        gameMaster.checkPlayers();
-        if(!gameMaster.inGame) {
-            showResult();
-        } else {
-            // スタート準備
-            gameMaster.setupNextTurn();
-        }
     }
 
     // CustomDialog表示
@@ -173,26 +190,62 @@ public class BattleActivity extends AppCompatActivity implements ParentCustomDia
         transaction.commit();
     }
 
+    private void showResultDialogFragment() {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        // 変化分を表示
+        int PCFS = gameMaster.getPlayer().getChangeFingerStock();
+        int PCSP = gameMaster.getPlayer().getChangeSkillPoint();
+        int OCFS = gameMaster.getOpponent().getChangeFingerStock();
+        int OCSP = gameMaster.getOpponent().getChangeSkillPoint();
+        transaction.add(ResultCustomDialogFragment.newInstance(PCFS, PCSP, OCFS, OCSP),"Result");
+        transaction.commit();
+    }
+
+    // ResultFragmentから呼ばれます
+    @Override
+    public void onDismissResultDialog() {
+        // UI更新
+        leftFinger = UIDrawHelper.checkFingerStock(gameMaster.getPlayer().fingerStock);
+        UIDrawHelper.setUpUI(gameMaster.getPlayers());
+        UIDrawHelper.setTurnLog(gameMaster.getTurnCount(), gameMaster.getPlayer(), gameMaster.getOpponent());
+
+        // ゲーム終了チェック
+        gameMaster.checkGameEnd();
+
+        if(!gameMaster.inGame) {
+            showResult();
+        } else {
+            // 次のターンスタート準備
+            gameMaster.setupNewTurn();
+        }
+    }
+
     // Fragmentから呼び出されます。
     @Override
-    public void onParentCustomDialogFragmentInteraction(int motionMode, int motionCount) {
-        // 前のターンでのステータスを保存
-        gameMaster.getPlayer().rememberBeforeStatus();
-        // 0: Callを選択
-        // 1: Skillを選択
+    public void onDecidedParentMotion(int motionMode, int motionCount) {
+        playSound();
+        // 0: Callを選択したパターン
+        // 1: Skillを選択したパターン
         if(motionMode == 0) gameMaster.getPlayer().setMotion(new Call(motionCount));
         if(motionMode == 1) gameMaster.getPlayer().setSkillFromUI(motionCount);
-        soundOne.start();
-        playingSound = true;
     }
 
     @Override
-    public void onChildCustomDialogFragmentInteraction(int usedSkillIndex) {
-        gameMaster.getPlayer().rememberBeforeStatus();
+    public void onDecidedChildMotion(int usedSkillIndex) {
+        playSound();
         // -1はスキルを発動しない
         gameMaster.getPlayer().setSkillFromUI(usedSkillIndex);
+    }
+
+    private void playSound() {
+        // 音声再生
         soundOne.start();
         playingSound = true;
+        binding.playerMotionTextView.setText("音が流れているよ！");
+        binding.opponentMotionTextView.setText("音が流れているよ！");
+        // 再生中は消しておく
+        binding.wantToDoRightTextView.setText("");
+        binding.wantToDoLeftTextView.setText("");
     }
 
     // ゲーム終了
@@ -201,15 +254,15 @@ public class BattleActivity extends AppCompatActivity implements ParentCustomDia
         // TODO:複数人対応
         for(Player clearPlayers : gameMaster.getClearPlayers()) {
             if (clearPlayers.isCPU()) {
-                message = "おれじぇねぇぇぇえ！！";
+                message = " おれじぇねぇぇぇえ！！";
             } else {
-                message = "俺！！！！１";
+                message = " 俺！！！";
             }
         }
         new AlertDialog.Builder(this)
                 .setTitle("【バトル終了】")
                 .setMessage("勝者は" + message)
-                .setPositiveButton("再開する", new DialogInterface.OnClickListener() {
+                .setPositiveButton("バトル再開！", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Intent intent = getIntent();
@@ -220,14 +273,10 @@ public class BattleActivity extends AppCompatActivity implements ParentCustomDia
                         startActivity(intent);
                     }
                 })
-                .setNeutralButton("終了する", new DialogInterface.OnClickListener() {
+                .setNeutralButton("アプリ終了", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        // 遷移先のActivityを指定して、Intentを作成する
-                        //Intent intent = new Intent(context, MainActivity.class);
-                        // 遷移先のアクティビティを起動させる
-                        //startActivity( intent );
-                        //finish();
+                        finish();
                     }
                 })
                 .setCancelable(false)

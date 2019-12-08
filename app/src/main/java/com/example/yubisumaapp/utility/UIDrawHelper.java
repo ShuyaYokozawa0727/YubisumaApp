@@ -53,8 +53,15 @@ public class UIDrawHelper {
     public int checkFingerStock(int fingerStock) {
         // 2以下
         int defaultFinger = 0;
-        if(fingerStock <= 1) {
+
+        if(fingerStock <= 0) {
+            binding.rightFingerImageButton.setVisibility(View.INVISIBLE);
+            binding.wantToDoRightTextView.setText("");
             binding.leftFingerImageButton.setVisibility(View.INVISIBLE);
+            binding.wantToDoLeftTextView.setText("");
+        } else if(fingerStock == 1) {
+            binding.leftFingerImageButton.setVisibility(View.INVISIBLE);
+            binding.wantToDoLeftTextView.setText("");
         } else {
             binding.leftFingerImageButton.setVisibility(View.VISIBLE);
             defaultFinger = 1;
@@ -62,11 +69,23 @@ public class UIDrawHelper {
         return defaultFinger;
     }
     public void setUpUI(ArrayList<Player> players) {
-        // アイコン初期化
+        // レイアウト初期化
         binding.playerFingerStockLayout.removeAllViews();
         binding.playerSkillPointLayout.removeAllViews();
         binding.opponentFingerStockLayout.removeAllViews();
         binding.opponentSkillPointLayout.removeAllViews();
+
+        // やってほしいことTextをセット
+        binding.wantToDoRightTextView.setText("タップしてスタート！");
+        binding.wantToDoLeftTextView.setText("タップしてスタート！");
+        if(binding.rightFingerImageButton.getVisibility() == View.INVISIBLE) {
+            binding.wantToDoRightTextView.setText("");
+        }
+        if(binding.leftFingerImageButton.getVisibility() == View.INVISIBLE) {
+            binding.wantToDoLeftTextView.setText("");
+        }
+
+        // プレイヤーごとのUIを更新
         for(Player player : players) {
             int fingerStock = player.fingerStock;
             int skillPoint = player.skillPoint;
@@ -84,8 +103,7 @@ public class UIDrawHelper {
                     text = "Skill : " + playerSkill.getSkillName();
                 }
             }
-            // アイコンリストを作成する
-
+            // アイコンリストを作成
             if(player instanceof CPU) {
                 binding.opponentMotionTextView.setText(text);
                 for(int index=0; index < fingerStock; index++) binding.opponentFingerStockLayout.addView(opponentFingerStockIconList.get(index));
@@ -106,6 +124,7 @@ public class UIDrawHelper {
         // ステータスの変化
         int changeOpponentFingerStock = opponent.fingerStock - opponent.beforeFingerStock;
         int changeOpponentSkillPoint = opponent.skillPoint - opponent.beforeSkillPoint;
+
         // ログをセット(DBを意識！)
         String playerChangeStatus = "P_"+player.getSkillName()+"_"+player.fingerStock+"_"+player.skillPoint+"_"+changePlayerFingerStock+"_"+changePlayerSkillPoint;
         String opponentChangeStatus = "O_"+opponent.getSkillName()+"_"+opponent.fingerStock+"_"+opponent.skillPoint+"_"+changeOpponentFingerStock+"_"+changeOpponentSkillPoint;

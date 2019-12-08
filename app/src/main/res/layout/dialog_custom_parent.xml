@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
     <androidx.constraintlayout.widget.ConstraintLayout
-        android:layout_width="405dp"
-        android:layout_height="303dp"
+        android:layout_width="400dp"
+        android:layout_height="240dp"
         android:layout_alignParentTop="true"
         android:layout_marginLeft="6dp"
         android:layout_marginTop="7dp"
@@ -23,7 +24,7 @@
             android:layout_height="wrap_content"
             android:background="#4CAF50"
             android:padding="10dp"
-            android:text="運命の選択"
+            android:text="君のターン"
             android:textColor="@android:color/white"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -34,8 +35,8 @@
             android:id="@+id/callImageButton"
             android:layout_width="144dp"
             android:layout_height="144dp"
-            android:layout_marginStart="32dp"
-            android:layout_marginLeft="32dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
             android:background="#00646464"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -43,11 +44,11 @@
             app:srcCompat="@drawable/ic_btn_speak_now" />
 
         <ImageButton
-            android:id="@+id/rightFingerImageButton"
+            android:id="@+id/skillImageButton"
             android:layout_width="144dp"
             android:layout_height="144dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginRight="32dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginRight="8dp"
             android:background="#00FFFFFF"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -57,22 +58,18 @@
         <TextView
             android:layout_width="144dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginLeft="32dp"
             android:gravity="center"
-            android:text="コール"
-            app:layout_constraintStart_toStartOf="parent"
+            android:text="コール！"
+            app:layout_constraintStart_toStartOf="@+id/callImageButton"
             app:layout_constraintTop_toTopOf="@+id/callImageButton" />
 
         <TextView
             android:layout_width="144dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="32dp"
-            android:layout_marginRight="32dp"
             android:gravity="center"
-            android:text="スキル"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/rightFingerImageButton" />
+            android:text="スキル！"
+            app:layout_constraintEnd_toEndOf="@+id/skillImageButton"
+            app:layout_constraintTop_toTopOf="@+id/skillImageButton" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
