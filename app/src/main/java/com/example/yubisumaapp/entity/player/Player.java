@@ -38,6 +38,7 @@ public class Player {
         if(!hasSkill()) {
             skillPoint++;
         }
+
         // 最大値に補正
         if(UIDrawHelper.ICON_SIZE < skillPoint) {
             skillPoint = UIDrawHelper.ICON_SIZE;
@@ -49,6 +50,7 @@ public class Player {
         if(fingerStock <= 0) {
             isClear = true;
         }
+
     }
 
     public void skillResult(boolean isSuccess) {

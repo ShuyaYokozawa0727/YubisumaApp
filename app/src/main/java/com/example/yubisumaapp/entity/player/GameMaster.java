@@ -26,7 +26,6 @@ public class GameMaster {
         parentPlayerIndex = 1;//new Random().nextInt(playerSizeAtStart);
         setupNextTurn();
      }
-
     // 一人対戦
     // プレイヤーを作成する
     private void createPlayers(int playerSize) {
@@ -37,7 +36,6 @@ public class GameMaster {
             players.add(new CPU(skillPoint, fingerCount, index));
         }
     }
-
     // Activityから呼び出される？
     public void setupNextTurn() {
         turnCount++;

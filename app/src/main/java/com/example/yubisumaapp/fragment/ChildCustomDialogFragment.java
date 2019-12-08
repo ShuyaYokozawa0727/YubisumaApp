@@ -85,6 +85,7 @@ public class ChildCustomDialogFragment extends DialogFragment {
                         }
                     })
                     .setPositiveButton("トラップを発動！", new DialogInterface.OnClickListener() {
+
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             usedSkillIndex = checkedItems.get(0);

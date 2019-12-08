@@ -61,7 +61,6 @@ public class UIDrawHelper {
         }
         return defaultFinger;
     }
-
     public void setUpUI(ArrayList<Player> players) {
         // アイコン初期化
         binding.playerFingerStockLayout.removeAllViews();
@@ -86,6 +85,7 @@ public class UIDrawHelper {
                 }
             }
             // アイコンリストを作成する
+
             if(player instanceof CPU) {
                 binding.opponentMotionTextView.setText(text);
                 for(int index=0; index < fingerStock; index++) binding.opponentFingerStockLayout.addView(opponentFingerStockIconList.get(index));
@@ -112,7 +112,6 @@ public class UIDrawHelper {
         logText += (turn + "," + playerChangeStatus+","+opponentChangeStatus + "\n") ;
         binding.logTextView.setText(logText);
     }
-
     /*
      * privateこのClass内だけ使われています
      */
@@ -175,5 +174,4 @@ public class UIDrawHelper {
                 .setPositiveButton("OK", null)
                 .show();
     }
-
 }

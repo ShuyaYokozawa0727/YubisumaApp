@@ -56,7 +56,6 @@ public class CPU extends Player {
             }
         }
     }
-
     private void childMotion() {
         // もし今の親のスキルポイントが0ならば
         if(player.skillPoint == 0) {
@@ -72,7 +71,6 @@ public class CPU extends Player {
             }
         }
     }
-
     private void randomCall() {
         // 自分以外の指の本数
         int othersFingersSize = totalFingerCount - getMyFingerCount();
