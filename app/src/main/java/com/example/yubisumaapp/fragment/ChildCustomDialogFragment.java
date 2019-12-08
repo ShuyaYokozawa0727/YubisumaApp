@@ -9,7 +9,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.TextView;
 import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.DialogFragment;
 import com.example.yubisumaapp.R;
@@ -76,7 +75,8 @@ public class ChildCustomDialogFragment extends DialogFragment {
             final List<Integer> checkedItems = new ArrayList<>();
             checkedItems.add(0);
             new AlertDialog.Builder(getActivity())
-                    .setTitle("発動するスキル選択する.")
+                    .setTitle("行動選択")
+                    .setMessage("☆チャージはスキルを発動しません")
                     .setSingleChoiceItems(availableSkillNameArray, 0, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
@@ -84,7 +84,7 @@ public class ChildCustomDialogFragment extends DialogFragment {
                             checkedItems.add(which);
                         }
                     })
-                    .setPositiveButton("発動する！", new DialogInterface.OnClickListener() {
+                    .setPositiveButton("トラップを発動！", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             usedSkillIndex = checkedItems.get(0);
@@ -98,7 +98,6 @@ public class ChildCustomDialogFragment extends DialogFragment {
                             decidedMotion();
                         }
                     })
-                    .setCancelable(false)
                     .show();
         }
     };

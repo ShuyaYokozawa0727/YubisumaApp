@@ -7,10 +7,10 @@ public class ChouChou extends Skill {
     @Override
     public int invokeEffect(boolean isSuccess) {
         if(isSuccess) {
-            // 使用者のfingerStockを2減らす
+            // fingerStockを2減らす
             return -2;
         } else {
-            // 使用者のfingerStockを2増やす
+            // fingerStockを2増やす
             return 2;
         }
     }

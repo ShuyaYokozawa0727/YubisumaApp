@@ -57,22 +57,6 @@ public class CPU extends Player {
         }
     }
 
-    private void randomCall() {
-        // 自分以外の指の本数
-        int othersFingersSize = totalFingerCount - getMyFingerCount();
-        // 自分が上げる指の本数
-        int myStandFingerCount = random.nextInt(getMyFingerCount());
-        // コールする数（自分+自分以外の本数を最大値としたランダムな数）
-        int myCallCount = myStandFingerCount + random.nextInt(othersFingersSize);
-        this.setMotion(new Call(new Action(myStandFingerCount), myCallCount));
-    }
-
-    private void randomSkill() {
-        // 発動可能だったSkillをランダムにセット
-        int randomNumber = random.nextInt(this.getAvailableSkillList().size());
-        setSkillFromUI(randomNumber);
-    }
-
     private void childMotion() {
         // もし今の親のスキルポイントが0ならば
         if(player.skillPoint == 0) {
@@ -87,5 +71,21 @@ public class CPU extends Player {
                 this.setMotion(SkillManager.defenceSkillList.get(SkillManager.TRAP));
             }
         }
+    }
+
+    private void randomCall() {
+        // 自分以外の指の本数
+        int othersFingersSize = totalFingerCount - getMyFingerCount();
+        // 自分が上げる指の本数
+        int myStandFingerCount = random.nextInt(getMyFingerCount());
+        // コールする数（自分+自分以外の本数を最大値としたランダムな数）
+        int myCallCount = myStandFingerCount + random.nextInt(othersFingersSize);
+        this.setMotion(new Call(new Action(myStandFingerCount), myCallCount));
+    }
+
+    private void randomSkill() {
+        // 発動可能だったSkillをランダムにセット
+        int randomNumber = random.nextInt(this.getAvailableSkillList().size());
+        setSkillFromUI(randomNumber);
     }
 }

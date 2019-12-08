@@ -50,14 +50,16 @@ public class UIDrawHelper {
     /*
      * BattleActivityで使われます
      */
-
-    public void checkFingerStock(int fingerStock) {
+    public int checkFingerStock(int fingerStock) {
         // 2以下
+        int defaultFinger = 0;
         if(fingerStock <= 1) {
             binding.leftFingerImageButton.setVisibility(View.INVISIBLE);
         } else {
             binding.leftFingerImageButton.setVisibility(View.VISIBLE);
+            defaultFinger = 1;
         }
+        return defaultFinger;
     }
 
     public void setUpUI(ArrayList<Player> players) {
@@ -73,17 +75,17 @@ public class UIDrawHelper {
             String text = "";
             if(player.getMotion()!=null) {
                 if(player.hasAction()) {
-                    Action playerAction = (Action)  player.getMotion();
+                    Action playerAction = player.getAction();
                     text = "Action : " + playerAction.getStandCount();
                 } else if(player.hasCall()) {
-                    Call playerCall = (Call) player.getMotion();
+                    Call playerCall = player.getCall();
                     text = "Action : "+ playerCall.getAction().getStandCount() + " / Call : " +playerCall.getCallCount();
                 } else if(player.hasSkill()) {
-                    Skill playerSkill = (Skill) player.getMotion();
+                    Skill playerSkill = player.getSkill();
                     text = "Skill : " + playerSkill.getSkillName();
                 }
             }
-            // アイコンをセットする
+            // アイコンリストを作成する
             if(player instanceof CPU) {
                 binding.opponentMotionTextView.setText(text);
                 for(int index=0; index < fingerStock; index++) binding.opponentFingerStockLayout.addView(opponentFingerStockIconList.get(index));
@@ -109,14 +111,6 @@ public class UIDrawHelper {
         String opponentChangeStatus = "O_"+opponent.getSkillName()+"_"+opponent.fingerStock+"_"+opponent.skillPoint+"_"+changeOpponentFingerStock+"_"+changeOpponentSkillPoint;
         logText += (turn + "," + playerChangeStatus+","+opponentChangeStatus + "\n") ;
         binding.logTextView.setText(logText);
-    }
-
-    public void showAlertDialog(String title, String message) {
-        new AlertDialog.Builder(context)
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("OK", null)
-                .show();
     }
 
     /*
@@ -173,4 +167,13 @@ public class UIDrawHelper {
             opponentSkillPointIconList.add(imageView);
         }
     }
+
+    public void showAlertDialog(String title, String message) {
+        new AlertDialog.Builder(context)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("OK", null)
+                .show();
+    }
+
 }

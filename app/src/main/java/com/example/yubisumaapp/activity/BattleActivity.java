@@ -128,7 +128,7 @@ public class BattleActivity extends AppCompatActivity implements ParentCustomDia
                 if (gameMaster.getPlayer().getMotion() == null) {
                     gameMaster.getPlayer().setMotion(action);
                 } else if(gameMaster.getPlayer().hasCall()) {
-                    ((Call) gameMaster.getPlayer().getMotion()).setAction(action);
+                    gameMaster.getPlayer().getCall().setAction(action);
                 }
                 // バトル開始
                 gameMaster.startBattle();
@@ -145,7 +145,7 @@ public class BattleActivity extends AppCompatActivity implements ParentCustomDia
         gameMaster.endTurn();
         // 変化後のステータスをUIに反映(引数リファクタリング候補)
         UIDrawHelper.setUpUI(gameMaster.getPlayers());
-        UIDrawHelper.checkFingerStock(gameMaster.getPlayer().fingerStock);
+        leftFinger = UIDrawHelper.checkFingerStock(gameMaster.getPlayer().fingerStock);
         UIDrawHelper.setTurnLog(gameMaster.getTurnCount(), gameMaster.getPlayer(), gameMaster.getOpponent());
         // ゲーム終了チェック
         gameMaster.checkPlayers();

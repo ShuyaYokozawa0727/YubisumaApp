@@ -1,11 +1,5 @@
 package com.example.yubisumaapp.entity.motion.skill;
-
-import com.example.yubisumaapp.entity.motion.skill.Skill;
-
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-
 public class SkillManager {
     // defence
     public static final int TRAP = 0;

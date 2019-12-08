@@ -30,13 +30,6 @@ public class Player {
 
     public void turnStart() {
         this.motion = null;
-        // 最大値に補正
-        if(UIDrawHelper.ICON_SIZE < skillPoint) {
-            skillPoint = UIDrawHelper.ICON_SIZE;
-        }
-        if(UIDrawHelper.ICON_SIZE < fingerStock) {
-            fingerStock = UIDrawHelper.ICON_SIZE;
-        }
         LogList.add(this);
     }
 
@@ -45,20 +38,26 @@ public class Player {
         if(!hasSkill()) {
             skillPoint++;
         }
+        // 最大値に補正
+        if(UIDrawHelper.ICON_SIZE < skillPoint) {
+            skillPoint = UIDrawHelper.ICON_SIZE;
+        }
+        if(UIDrawHelper.ICON_SIZE < fingerStock) {
+            fingerStock = UIDrawHelper.ICON_SIZE;
+        }
         // クリアしたら
         if(fingerStock <= 0) {
             isClear = true;
         }
-
     }
 
     public void skillResult(boolean isSuccess) {
-        this.fingerStock += takeSkill().invokeEffect(isSuccess);
+        this.fingerStock += getSkill().invokeEffect(isSuccess);
     }
 
     public void callResult(int standTotalFingerCount) {
         // コール成功
-        if(standTotalFingerCount == takeCall().getCallCount()) {
+        if(standTotalFingerCount == getCall().getCallCount()) {
             this.fingerStock -= 1;
         }
     }
@@ -115,7 +114,7 @@ public class Player {
 
     public String getSkillName() {
         if(hasSkill()) {
-            return ((Skill)motion).getSkillName();
+            return getSkill().getSkillName();
         } else {
             return "";
         }
@@ -158,15 +157,15 @@ public class Player {
         return motion instanceof Skill;
     }
 
-    public Action takeAction() {
+    public Action getAction() {
         return (Action)motion;
     }
 
-    public Call takeCall() {
+    public Call getCall() {
         return (Call)motion;
     }
 
-    public Skill takeSkill() {
+    public Skill getSkill() {
         return (Skill)motion;
     }
 }

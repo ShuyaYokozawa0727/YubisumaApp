@@ -5,8 +5,6 @@ import android.util.Log;
 import com.example.yubisumaapp.entity.motion.skill.Trap;
 
 import java.util.ArrayList;
-import java.util.EventListener;
-import java.util.Random;
 
 public class GameMaster {
     private int turnCount = 0; // ターン開始時にインクリメント
@@ -29,6 +27,17 @@ public class GameMaster {
         setupNextTurn();
      }
 
+    // 一人対戦
+    // プレイヤーを作成する
+    private void createPlayers(int playerSize) {
+        int skillPoint = 5;
+        int fingerCount = 5;
+        players.add(new Player(skillPoint, fingerCount, 0));
+        for(int index=1; index < playerSize; index++) {
+            players.add(new CPU(skillPoint, fingerCount, index));
+        }
+    }
+
     // Activityから呼び出される？
     public void setupNextTurn() {
         turnCount++;
@@ -37,7 +46,7 @@ public class GameMaster {
         for(Player player : players) {
             player.turnStart();
         }
-        cacheTotalFingerSize();
+        setTotalFingerSize();
         cacheParentPlayer();
     }
 
@@ -88,17 +97,6 @@ public class GameMaster {
         }
     }
 
-    // 一人対戦
-    // プレイヤーを作成する
-    private void createPlayers(int playerSize) {
-        int skillPoint = 1;
-        int fingerCount = 2;
-        players.add(new Player(skillPoint, fingerCount, 0));
-        for(int index=1; index < playerSize; index++) {
-            players.add(new CPU(skillPoint, fingerCount, index));
-        }
-    }
-
     // parentPlayerをキャッシュする
     // 以降はメンバの参照だけ
     private void cacheParentPlayer() {
@@ -124,7 +122,9 @@ public class GameMaster {
         int standTotalFingerCount = 0;
         for(Player player : players) {
             if(player.hasAction()) {
-                standTotalFingerCount+=player.takeAction().getStandCount();
+                standTotalFingerCount += player.getAction().getStandCount();
+            } else if(player.hasCall()) {
+                standTotalFingerCount += player.getCall().getAction().getStandCount();
             } else if(player.hasSkill()) {
                 if(player.motion instanceof Trap) {
                     player.skillResult(false);
@@ -169,7 +169,7 @@ public class GameMaster {
     }
 
     // 場の指の本数を数える
-    private void cacheTotalFingerSize() {
+    private void setTotalFingerSize() {
         totalFingerCount = 0;
         for(Player player : players) {
             totalFingerCount += player.getMyFingerCount();
@@ -184,9 +184,5 @@ public class GameMaster {
     // ターン数を返す
     public int getTurnCount() {
         return turnCount;
-    }
-
-    public interface FingerStockListenerInterface extends EventListener {
-        public void isPlayerGameOver();
     }
 }
