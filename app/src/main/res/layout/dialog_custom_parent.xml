@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent" >
 
-    <!-- コンテンツ -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="405dp"
         android:layout_height="303dp"
@@ -19,7 +17,6 @@
         android:paddingBottom="20dp"
         android:splitMotionEvents="false">
 
-        <!-- タイトル -->
         <TextView
             android:id="@+id/titleCustomDialog"
             android:layout_width="match_parent"
@@ -32,10 +29,6 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <!-- メッセージ -->
-
-        <!-- OK ボタン -->
 
         <ImageButton
             android:id="@+id/callImageButton"
@@ -82,7 +75,5 @@
             app:layout_constraintTop_toTopOf="@+id/rightFingerImageButton" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <!-- Close ボタン -->
 
 </RelativeLayout>

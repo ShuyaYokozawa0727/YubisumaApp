@@ -76,7 +76,7 @@ public class ChildCustomDialogFragment extends DialogFragment {
             checkedItems.add(0);
             new AlertDialog.Builder(getActivity())
                     .setTitle("行動選択")
-                    .setMessage("☆チャージはスキルを発動しません")
+                    .setMessage("☆チャージはスキルを発動しません\nトラップを発動すると☆はチャージされません")
                     .setSingleChoiceItems(availableSkillNameArray, 0, new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {

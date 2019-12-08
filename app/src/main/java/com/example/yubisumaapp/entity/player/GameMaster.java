@@ -29,7 +29,7 @@ public class GameMaster {
     // 一人対戦
     // プレイヤーを作成する
     private void createPlayers(int playerSize) {
-        int skillPoint = 5;
+        int skillPoint = 2;
         int fingerCount = 5;
         players.add(new Player(skillPoint, fingerCount, 0));
         for(int index=1; index < playerSize; index++) {
