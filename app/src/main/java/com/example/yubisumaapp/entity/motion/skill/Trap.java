@@ -1,6 +1,8 @@
 package com.example.yubisumaapp.entity.motion.skill;
 
-public class Trap extends Skill {
+import java.io.Serializable;
+
+public class Trap extends Skill implements Serializable {
     public Trap(String skillName, int consumeSkillPoint) {
         super(skillName, consumeSkillPoint);
     }

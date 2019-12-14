@@ -1,6 +1,8 @@
 package com.example.yubisumaapp.entity.motion;
 
-public class Call extends Motion {
+import java.io.Serializable;
+
+public class Call extends Motion implements Serializable {
     private int callCount;
     private Action action;
 

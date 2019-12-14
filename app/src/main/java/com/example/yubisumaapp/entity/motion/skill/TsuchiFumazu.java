@@ -1,6 +1,8 @@
 package com.example.yubisumaapp.entity.motion.skill;
 
-public class TsuchiFumazu extends Skill {
+import java.io.Serializable;
+
+public class TsuchiFumazu extends Skill implements Serializable {
     public TsuchiFumazu(String skillName, int consumeSkillPoint) {
         super(skillName, consumeSkillPoint);
     }

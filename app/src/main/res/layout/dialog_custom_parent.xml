@@ -53,7 +53,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/titleCustomDialog"
-            app:srcCompat="@drawable/btn_star_big_on" />
+            app:srcCompat="@drawable/skill_point" />
 
         <TextView
             android:layout_width="144dp"

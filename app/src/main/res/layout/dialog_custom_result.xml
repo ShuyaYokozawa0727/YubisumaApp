@@ -75,7 +75,7 @@
             android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imageView3"
-            app:srcCompat="@drawable/btn_star_big_on" />
+            app:srcCompat="@drawable/skill_point" />
 
         <TextView
             android:id="@+id/changePlayerFingerStockTextView"
@@ -119,7 +119,7 @@
             android:layout_marginRight="32dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/imageView5"
-            app:srcCompat="@drawable/btn_star_big_on" />
+            app:srcCompat="@drawable/skill_point" />
 
         <TextView
             android:id="@+id/changeOpponentFingerStockTextView"

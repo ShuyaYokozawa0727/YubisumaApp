@@ -14,28 +14,31 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.example.yubisumaapp.R;
-import com.example.yubisumaapp.databinding.ActivityBattleBinding;
+import com.example.yubisumaapp.databinding.ActivityYubisumaBinding;
 import com.example.yubisumaapp.entity.motion.Action;
 import com.example.yubisumaapp.entity.motion.Call;
 import com.example.yubisumaapp.entity.player.GameMaster;
-import com.example.yubisumaapp.entity.player.Player;
+import com.example.yubisumaapp.entity.player.Member;
+import com.example.yubisumaapp.fragment.BattleCustomDialogFragment;
 import com.example.yubisumaapp.fragment.ChildCustomDialogFragment;
 import com.example.yubisumaapp.fragment.ParentCustomDialogFragment;
 import com.example.yubisumaapp.fragment.ResultCustomDialogFragment;
-import com.example.yubisumaapp.utility.UIDrawHelper;
+import com.example.yubisumaapp.utility.UIDrawer;
 
-public class BattleActivity
+public class YubisumaActivity
         extends AppCompatActivity
         implements ParentCustomDialogFragment.OnFragmentInteractionListener
-        ,          ChildCustomDialogFragment.OnFragmentInteractionListener
-        ,          ResultCustomDialogFragment.OnFragmentInteractionListener
+                 , ChildCustomDialogFragment.OnFragmentInteractionListener
+                 , ResultCustomDialogFragment.OnFragmentInteractionListener
 {
     // こっから本文
+    public static final int ICON_SIZE = 7;
+
     private GameMaster gameMaster;
     private static int playerSize = 2;
 
-    private ActivityBattleBinding binding;
-    private UIDrawHelper UIDrawHelper;
+    private ActivityYubisumaBinding binding;
+    private UIDrawer UIDrawer;
 
     private MediaPlayer soundOne, soundTwo;
 
@@ -49,16 +52,16 @@ public class BattleActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         // コンポーネントを自動でバインディングしてくれる偉い人。
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_battle);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_yubisuma);
 
         // GameMaster生成
         gameMaster = new GameMaster(playerSize);
         // UIDrawHelper生成
-        UIDrawHelper = new UIDrawHelper(this, binding);
+        UIDrawer = new UIDrawer(this, binding);
 
         // UI関係のセットアップ
-        leftFinger = UIDrawHelper.checkFingerStock(gameMaster.getPlayer().fingerStock);
-        UIDrawHelper.setUpUI(gameMaster.getPlayers());
+        leftFinger = UIDrawer.checkFingerStock(gameMaster.getPlayer().fingerStock);
+        UIDrawer.setUpUI(gameMaster.getMembers());
 
         // 音声ファイルをロード
         soundOne = MediaPlayer.create(this, R.raw.conch1);
@@ -81,7 +84,7 @@ public class BattleActivity
                     if (!playingSound) {
                         // 非表示ではなければ
                         if (binding.leftFingerImageButton.getVisibility() != View.INVISIBLE) {
-                            binding.wantToDoLeftTextView.setText("タップしてスタート！");
+                            binding.wantToDoLeftTextView.setText(R.string.tap_start);
                         }
                     }
                 }
@@ -104,7 +107,7 @@ public class BattleActivity
                     binding.rightFingerImageButton.setImageResource(R.drawable.good_rev);
                     if(!playingSound) {
                         if(binding.rightFingerImageButton.getVisibility() != View.INVISIBLE) {
-                            binding.wantToDoRightTextView.setText("タップしてスタート！");
+                            binding.wantToDoRightTextView.setText(R.string.tap_start);
                         }
                     }
                 }
@@ -137,7 +140,7 @@ public class BattleActivity
                 }
                 if(showDialog) {
                     leaveFingers = false;
-                    showDialogFragment(); // フラグメントから音声再生は呼び出される
+                    showMotionSelectDialogFragment(); // フラグメントから音声再生は呼び出される
                 }
                 return false;
             }
@@ -152,31 +155,19 @@ public class BattleActivity
                 // シンバル再生
                 soundTwo.start();
 
-                // Actionだけがここで決定する
-                // TODO: addActionとかでリファクタリング（CPU側も）
-                Action action = new Action(rightFinger+leftFinger);
-                if (gameMaster.getPlayer().getMotion() == null) {
-                    // 子だったらActionだけセット
-                    gameMaster.getPlayer().setMotion(action);
-                } else if(gameMaster.getPlayer().hasCall()) {
-                    // CallしてたらActionを組み込む
-                    gameMaster.getPlayer().getCall().setAction(action);
-                }
-
-                // リザルト作成
-                gameMaster.createResult();
-                // この時点でターン終了
-                gameMaster.endTurn();
-
-                // リザルト表示(フラグメント)
-                showResultDialogFragment();
+                // Actionを決定する
+                gameMaster.addAction(new Action(rightFinger+leftFinger));
+                gameMaster.determineCPUMotion();
+                // 両者のMotionは確定したのでバトル開始
+                showBattleDialogFragment();
             }
         });
     }
 
-    // CustomDialog表示
-    private void showDialogFragment() {
+    // 行動選択画面表示
+    private void showMotionSelectDialogFragment() {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        // 発動可能なスキル名一覧
         String[] availableSkillNameArray = gameMaster.getPlayer().getAvailableSkillNameArray();
         // 親の場合
         if(gameMaster.getPlayer().isParent) {
@@ -190,36 +181,6 @@ public class BattleActivity
         transaction.commit();
     }
 
-    private void showResultDialogFragment() {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        // 変化分を表示
-        int PCFS = gameMaster.getPlayer().getChangeFingerStock();
-        int PCSP = gameMaster.getPlayer().getChangeSkillPoint();
-        int OCFS = gameMaster.getOpponent().getChangeFingerStock();
-        int OCSP = gameMaster.getOpponent().getChangeSkillPoint();
-        transaction.add(ResultCustomDialogFragment.newInstance(PCFS, PCSP, OCFS, OCSP),"Result");
-        transaction.commit();
-    }
-
-    // ResultFragmentから呼ばれます
-    @Override
-    public void onDismissResultDialog() {
-        // UI更新
-        leftFinger = UIDrawHelper.checkFingerStock(gameMaster.getPlayer().fingerStock);
-        UIDrawHelper.setUpUI(gameMaster.getPlayers());
-        UIDrawHelper.setTurnLog(gameMaster.getTurnCount(), gameMaster.getPlayer(), gameMaster.getOpponent());
-
-        // ゲーム終了チェック
-        gameMaster.checkGameEnd();
-
-        if(!gameMaster.inGame) {
-            showResult();
-        } else {
-            // 次のターンスタート準備
-            gameMaster.setupNewTurn();
-        }
-    }
-
     // Fragmentから呼び出されます。
     @Override
     public void onDecidedParentMotion(int motionMode, int motionCount) {
@@ -227,14 +188,14 @@ public class BattleActivity
         // 0: Callを選択したパターン
         // 1: Skillを選択したパターン
         if(motionMode == 0) gameMaster.getPlayer().setMotion(new Call(motionCount));
-        if(motionMode == 1) gameMaster.getPlayer().setSkillFromUI(motionCount);
+        if(motionMode == 1) gameMaster.getPlayer().setSkill(motionCount);
     }
 
     @Override
     public void onDecidedChildMotion(int usedSkillIndex) {
         playSound();
         // -1はスキルを発動しない
-        gameMaster.getPlayer().setSkillFromUI(usedSkillIndex);
+        gameMaster.getPlayer().setSkill(usedSkillIndex);
     }
 
     private void playSound() {
@@ -248,12 +209,44 @@ public class BattleActivity
         binding.wantToDoLeftTextView.setText("");
     }
 
+    private void showBattleDialogFragment() {
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.add(BattleCustomDialogFragment.newInstance(gameMaster.parentIndex, gameMaster.getMotionList()),"Battle");
+        transaction.commit();
+    }
+
+    // ResultFragmentから呼ばれます
+    @Override
+    public void onDismissResultDialog(int playerChangeFS, int playerChangeSP, int opponentChangeFS, int opponentChangeSP) {
+        // 変化を反映
+        gameMaster.getPlayer().fingerStock += playerChangeFS;
+        gameMaster.getPlayer().skillPoint += playerChangeSP;
+        gameMaster.getOpponent().fingerStock += opponentChangeFS;
+        gameMaster.getOpponent().skillPoint += opponentChangeSP;
+
+        gameMaster.endTurn();
+        // UI更新
+        leftFinger = UIDrawer.checkFingerStock(gameMaster.getPlayer().fingerStock);
+        UIDrawer.setUpUI(gameMaster.getMembers());
+        UIDrawer.setTurnLog(gameMaster.getTurnCount(), gameMaster.getPlayer(), gameMaster.getOpponent());
+
+        // ゲーム終了チェック
+        gameMaster.checkGameEnd();
+
+        if(!gameMaster.inGame) {
+            showResult();
+        } else {
+            // 次のターンスタート準備
+            gameMaster.setupNewTurn();
+        }
+    }
+
     // ゲーム終了
     private void showResult() {
         String message = "";
         // TODO:複数人対応
-        for(Player clearPlayers : gameMaster.getClearPlayers()) {
-            if (clearPlayers.isCPU()) {
+        for(Member clearMember : gameMaster.getClearMembers()) {
+            if (clearMember.isCPU()) {
                 message = " おれじぇねぇぇぇえ！！";
             } else {
                 message = " 俺！！！";

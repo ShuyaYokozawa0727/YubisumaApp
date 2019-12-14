@@ -1,9 +1,6 @@
 package com.example.yubisumaapp.utility;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -12,19 +9,20 @@ import android.widget.LinearLayout;
 import androidx.appcompat.app.AlertDialog;
 
 import com.example.yubisumaapp.R;
-import com.example.yubisumaapp.databinding.ActivityBattleBinding;
+import com.example.yubisumaapp.databinding.ActivityYubisumaBinding;
 import com.example.yubisumaapp.entity.motion.Action;
 import com.example.yubisumaapp.entity.motion.Call;
-import com.example.yubisumaapp.entity.motion.Motion;
 import com.example.yubisumaapp.entity.motion.skill.Skill;
 import com.example.yubisumaapp.entity.player.CPU;
+import com.example.yubisumaapp.entity.player.Member;
 import com.example.yubisumaapp.entity.player.Player;
 
 import java.util.ArrayList;
 
-public class UIDrawHelper {
+import static com.example.yubisumaapp.activity.YubisumaActivity.ICON_SIZE;
 
-    public static final int ICON_SIZE = 7;
+public class UIDrawer {
+
     private static int WC = ViewGroup.LayoutParams.WRAP_CONTENT;
     private static LinearLayout.LayoutParams layoutWCParams = new LinearLayout.LayoutParams(WC, WC);
 
@@ -34,11 +32,11 @@ public class UIDrawHelper {
     private ArrayList<ImageView> opponentSkillPointIconList=null;
 
     private Context context;
-    private ActivityBattleBinding binding;
+    private ActivityYubisumaBinding binding;
 
     private String logText="";
 
-    public UIDrawHelper(Context context, ActivityBattleBinding binding) {
+    public UIDrawer(Context context, ActivityYubisumaBinding binding) {
         this.context = context;
         this.binding = binding;
         createPlayerFingerStockIconList();
@@ -68,7 +66,8 @@ public class UIDrawHelper {
         }
         return defaultFinger;
     }
-    public void setUpUI(ArrayList<Player> players) {
+
+    public void setUpUI(ArrayList<Member> members) {
         // レイアウト初期化
         binding.playerFingerStockLayout.removeAllViews();
         binding.playerSkillPointLayout.removeAllViews();
@@ -76,8 +75,8 @@ public class UIDrawHelper {
         binding.opponentSkillPointLayout.removeAllViews();
 
         // やってほしいことTextをセット
-        binding.wantToDoRightTextView.setText("タップしてスタート！");
-        binding.wantToDoLeftTextView.setText("タップしてスタート！");
+        binding.wantToDoRightTextView.setText(R.string.tap_start);
+        binding.wantToDoLeftTextView.setText(R.string.tap_start);
         if(binding.rightFingerImageButton.getVisibility() == View.INVISIBLE) {
             binding.wantToDoRightTextView.setText("");
         }
@@ -86,25 +85,25 @@ public class UIDrawHelper {
         }
 
         // プレイヤーごとのUIを更新
-        for(Player player : players) {
-            int fingerStock = player.fingerStock;
-            int skillPoint = player.skillPoint;
+        for(Member member : members) {
+            int fingerStock = member.fingerStock;
+            int skillPoint = member.skillPoint;
             // モーションログテキストを初期化・セット
             String text = "";
-            if(player.getMotion()!=null) {
-                if(player.hasAction()) {
-                    Action playerAction = player.getAction();
+            if(member.getMotion()!=null) {
+                if(member.hasAction()) {
+                    Action playerAction = member.getAction();
                     text = "Action : " + playerAction.getStandCount();
-                } else if(player.hasCall()) {
-                    Call playerCall = player.getCall();
+                } else if(member.hasCall()) {
+                    Call playerCall = member.getCall();
                     text = "Action : "+ playerCall.getAction().getStandCount() + " / Call : " +playerCall.getCallCount();
-                } else if(player.hasSkill()) {
-                    Skill playerSkill = player.getSkill();
+                } else if(member.hasSkill()) {
+                    Skill playerSkill = member.getSkill();
                     text = "Skill : " + playerSkill.getSkillName();
                 }
             }
             // アイコンリストを作成
-            if(player instanceof CPU) {
+            if(member instanceof CPU) {
                 binding.opponentMotionTextView.setText(text);
                 for(int index=0; index < fingerStock; index++) binding.opponentFingerStockLayout.addView(opponentFingerStockIconList.get(index));
                 for(int index=0; index < skillPoint; index++) binding.opponentSkillPointLayout.addView(opponentSkillPointIconList.get(index));
@@ -153,7 +152,7 @@ public class UIDrawHelper {
             // ImageViewのインスタンス生成
             ImageView imageView = new ImageView(context);
             // 画像をセット
-            imageView.setImageResource(R.drawable.btn_star_big_on);
+            imageView.setImageResource(R.drawable.skill_point);
             imageView.setLayoutParams(layoutWCParams);
             // とりあえずリストに追加
             playerSkillPointIconList.add(imageView);
@@ -179,7 +178,7 @@ public class UIDrawHelper {
             // ImageViewのインスタンス生成
             ImageView imageView = new ImageView(context);
             // 画像をセット
-            imageView.setImageResource(R.drawable.btn_star_big_on);
+            imageView.setImageResource(R.drawable.skill_point);
             imageView.setLayoutParams(layoutWCParams);
             // とりあえずリストに追加
             opponentSkillPointIconList.add(imageView);

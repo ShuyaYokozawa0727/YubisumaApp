@@ -2,7 +2,9 @@ package com.example.yubisumaapp.entity.motion.skill;
 
 import com.example.yubisumaapp.entity.motion.Motion;
 
-public abstract class Skill extends Motion {
+import java.io.Serializable;
+
+public abstract class Skill extends Motion implements Serializable {
     private String skillName;
     private int consumeSkillPoint;
 

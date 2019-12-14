@@ -17,7 +17,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         gameStart = findViewById(R.id.button);
-        final Intent intent = new Intent(this, BattleActivity.class);
+        final Intent intent = new Intent(this, YubisumaActivity.class);
         gameStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

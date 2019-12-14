@@ -9,8 +9,6 @@ import android.view.WindowManager;
 
 import androidx.fragment.app.DialogFragment;
 
-import com.example.yubisumaapp.R;
-
 public class BaseCustomDialogFragment extends DialogFragment {
     public Dialog customDialog;
 

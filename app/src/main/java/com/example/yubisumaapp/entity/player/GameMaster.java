@@ -1,177 +1,139 @@
 package com.example.yubisumaapp.entity.player;
 
-import android.util.Log;
-
-import com.example.yubisumaapp.entity.motion.skill.Trap;
+import com.example.yubisumaapp.entity.motion.Action;
+import com.example.yubisumaapp.entity.motion.Call;
+import com.example.yubisumaapp.entity.motion.Motion;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class GameMaster {
     private int turnCount = 0; // ターン開始時にインクリメント
     private int totalFingerCount = 0; // ターン開始時にチェック
-    private int playerSizeAtStart = 0;
-    private int parentPlayerIndex = 0;
+    // 初期参加数
+    private int memberSizeAtStart = 0;
+    // 親は誰か
+    public int parentIndex;
 
     public boolean inGame = true; // ターン終了時にチェック
 
-    private ArrayList<Player> players = new ArrayList<>();
-    private ArrayList<Player> clearPlayers = new ArrayList<>();
+    private ArrayList<Member> members = new ArrayList<>();
+    private ArrayList<Member> clearMembers = new ArrayList<>();
 
-    private Player parentPlayer;
-
-    public GameMaster(int playerSizeAtStart) {
-        this.playerSizeAtStart = playerSizeAtStart;
-        createPlayers(playerSizeAtStart);
-        // 0が子, 1が親
-        parentPlayerIndex = 0;//new Random().nextInt(playerSizeAtStart);
+    public GameMaster(int memberSize) {
+        createMembers(memberSize);
+        parentIndex = new Random().nextInt(memberSize); // 初期値はランダム
         setupNewTurn();
      }
+
     // 一人対戦
     // プレイヤーを作成する
-    private void createPlayers(int playerSize) {
-        int skillPoint = 0;
-        int fingerCount = 1;
-        players.add(new Player(skillPoint, fingerCount, 0));
-        players.add(new CPU(skillPoint, 3, 1));
+    private void createMembers(int memberSize) {
+        this.memberSizeAtStart = memberSize;
+        // 初期設定
+        int skillPoint = 2;
+        int fingerCount = 5;
+        members.add(new Player(skillPoint, fingerCount, 0));
+        members.add(new CPU(skillPoint, fingerCount, 1));
         /*for(int index=1; index < playerSize; index++) {
-            players.add(new CPU(skillPoint, fingerCount, index));
+            members.add(new CPU(skillPoint, fingerCount, index));
         }*/
     }
+
     // Activityから呼び出される？
     public void setupNewTurn() {
         turnCount++;
         findNextParent();
         // プレイヤー達の開始処理
-        for(Player player : players) {
-            player.turnStart();
+        for(Member member : members) {
+            member.setupTurn();
         }
         setTotalFingerSize();
-        cacheParentPlayer();
-    }
-
-    // これはActivityでPlayerのMotionが確定したら呼び出される
-    public void createResult() {
-        determineCPUMotion();
-        // 親がどんな動きをしたか
-        if(parentPlayer.hasCall()) {
-            parentCallProcess();
-        } else if (parentPlayer.hasSkill()) {
-            parentSkillProcess();
-        }
     }
 
     public void endTurn() {
-        for(Player player : players) {
-            player.turnEnd();
+        for(Member member : members) {
+            member.turnEnd();
         }
     }
 
     public void checkGameEnd() {
         // プレイヤーがクリアしたかチェック
-        for(Player player : players) {
-            if(player.isClear) clearPlayers.add(player);
+        for(Member member : members) {
+            if(member.isClear) clearMembers.add(member);
         }
         // クリアしたプレイヤーを削除
-        for(Player clearPlayer : clearPlayers) {
-            players.remove(clearPlayer);
+        for(Member clearPlayer : clearMembers) {
+            members.remove(clearPlayer);
         }
-        if(clearPlayers.size() == playerSizeAtStart-1) {
+        if(clearMembers.size() == memberSizeAtStart -1) {
             inGame = false;
         }
     }
 
     private void findNextParent() {
-        parentPlayerIndex = (parentPlayerIndex+1) % players.size();
-        for(Player player : players) {
-            if(player.playerIndex == parentPlayerIndex) {
-                if(player.isClear) {
+        parentIndex = (parentIndex +1) % members.size();
+        for(Member member : members) {
+            if(member.memberIndex == parentIndex) {
+                if(member.isClear) {
                     // 複数プレイヤー対応したらどうなるかな～
                     findNextParent();
                 } else {
-                    player.isParent = true;
+                    member.isParent = true;
                 }
             } else {
-                player.isParent = false;
+                member.isParent = false;
             }
         }
     }
 
-    // parentPlayerをキャッシュする
-    // 以降はメンバの参照だけ
-    private void cacheParentPlayer() {
-        // parentPlayerをキャッシュ
-        for(Player player : players) {
-            if (player.isParent) {
-                // 親プレイヤーをセット
-                parentPlayer = player;
-            }
+    public void addAction(Action action) {
+
+        if (getPlayer().getMotion() == null) {
+            // 子だったらActionだけセット
+            getPlayer().setMotion(action);
+        } else if(getPlayer().getMotion() instanceof Call) {
+            // CallしてたらActionを組み込む
+            getPlayer().getCall().setAction(action);
         }
     }
 
     // CPUのMotionを決定する
-    private void determineCPUMotion() {
+    public void determineCPUMotion() {
         // CPUのMotionを決定する
         CPU cpu = (CPU) getOpponent();
         cpu.createCPUMotion(getPlayer(), totalFingerCount);
-        Log.v("CPU", cpu.toString());
-    }
-
-    // parentがCallだったときの処理
-    private void parentCallProcess() {
-        int standTotalFingerCount = 0;
-        for(Player player : players) {
-            if(player.hasAction()) {
-                standTotalFingerCount += player.getAction().getStandCount();
-            } else if(player.hasCall()) {
-                standTotalFingerCount += player.getCall().getAction().getStandCount();
-            } else if(player.hasSkill()) {
-                if(player.motion instanceof Trap) {
-                    player.skillResult(false);
-                } else {
-                    // TODO: Trap以外の防御スキルができたら追加
-                }
-            }
-        }
-        parentPlayer.callResult(standTotalFingerCount);
-    }
-
-    // parentがSkillを発動したときの処理
-    private void parentSkillProcess() {
-        boolean isSuccess = true;
-        for(Player childPlayer : players) {
-            if(!childPlayer.equals(parentPlayer)) {
-                if(childPlayer.motion instanceof Trap) {
-                    isSuccess = false;
-                }
-            }
-        }
-        parentPlayer.skillResult(isSuccess);
     }
 
     // Playerは必ずindex = 0
     public Player getPlayer() {
-        return players.get(0);
+        return (Player) members.get(0);
+    }
+
+    public ArrayList<Motion> getMotionList() {
+        ArrayList<Motion> motions = new ArrayList<>();
+        for(Member member : members) {
+            motions.add(member.getMotion());
+        }
+        return motions;
     }
 
     // 二人用専用
-    public Player getOpponent() {
-        return players.get(1);
+    public Player getOpponent() { return (Player)members.get(1); }
+
+    public ArrayList<Member> getMembers() {
+        return members;
     }
 
-    // playerリストを返す
-    public ArrayList<Player> getPlayers() {
-        return players;
-    }
-
-    public ArrayList<Player> getClearPlayers() {
-        return clearPlayers;
+    public ArrayList<Member> getClearMembers() {
+        return clearMembers;
     }
 
     // 場の指の本数を数える
     private void setTotalFingerSize() {
         totalFingerCount = 0;
-        for(Player player : players) {
-            totalFingerCount += player.getMyFingerCount();
+        for(Member member : members) {
+            totalFingerCount += member.getMyFingerCount();
         }
     }
 
