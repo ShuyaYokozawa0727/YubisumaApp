@@ -7,7 +7,7 @@ import android.widget.TextView;
 
 import com.example.yubisumaapp.R;
 
-public class PopUpDialogFragment extends BaseCustomDialogFragment {
+public class PopUpDialogFragment extends BaseDialogFragment {
 
     // バンドルから取り出すためのキー
     private static final String MESSAGE = "MESSAGE";

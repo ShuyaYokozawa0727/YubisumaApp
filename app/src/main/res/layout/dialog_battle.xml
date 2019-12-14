@@ -64,18 +64,6 @@
             app:srcCompat="@drawable/cho" />
 
         <TextView
-            android:id="@+id/textView4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginLeft="8dp"
-            android:text="おや : "
-            android:textColor="#FFFFFF"
-            app:layout_constraintBottom_toBottomOf="@+id/callImageView"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/callImageView" />
-
-        <TextView
             android:id="@+id/parentPlayerTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -84,8 +72,9 @@
             android:text="あなた"
             android:textColor="#FFFFFF"
             app:layout_constraintBottom_toBottomOf="@+id/callImageView"
-            app:layout_constraintStart_toEndOf="@+id/textView4"
-            app:layout_constraintTop_toTopOf="@+id/callImageView" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/callImageView"
+            app:layout_constraintVertical_bias="0.47" />
 
         <ImageView
             android:id="@+id/opponentActionImageView"
@@ -108,6 +97,16 @@
             app:layout_constraintBottom_toBottomOf="@+id/playerImageView"
             app:layout_constraintStart_toStartOf="parent"
             app:srcCompat="@drawable/count0" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=" : コール数"
+            android:textColor="#FFFFFF"
+            app:layout_constraintBottom_toBottomOf="@+id/callImageView"
+            app:layout_constraintStart_toEndOf="@+id/parentPlayerTextView"
+            app:layout_constraintTop_toTopOf="@+id/callImageView"
+            app:layout_constraintVertical_bias="0.47" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -9,39 +9,28 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import androidx.appcompat.app.AlertDialog;
-
 import com.example.yubisumaapp.R;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.example.yubisumaapp.utility.YubiSumaUtility.createRangeLabel;
-
-public class ParentCustomDialogFragment extends BaseCustomDialogFragment {
+public class ChildDialogFragment extends BaseDialogFragment {
 
     // バンドルから取り出すためのキー
-    private static final String MAX_CALL_COUNT = "maxCallCount";
-    private static final String SKILL_POINT = "skillPoint";
     private static final String AVAILABLE_SKILL_NAME_ARRAY = "availableSkillNameArray";
 
-    // Activityから取得してくるデータ
-    private int maxCallCount;
-    private int skillPoint;
+    private ChildDialogFragment.OnFragmentInteractionListener mListener;
+
     private String[] availableSkillNameArray;
 
-    // Activityに返すデータ
-    private int motionCount=0;
-
-    private ParentCustomDialogFragment.OnFragmentInteractionListener mListener;
+    private int usedSkillIndex=0;
 
     // 必要なデータを用意する
-    public static ParentCustomDialogFragment newInstance(int maxCallCount, int skillPoint, String[] availableSkillNameArray) {
+    public static ChildDialogFragment newInstance(String[] availableSkillNameArray) {
         // 引数のセット
         Bundle args = new Bundle();
-        args.putInt(MAX_CALL_COUNT, maxCallCount);
-        args.putInt(SKILL_POINT, skillPoint);
         args.putStringArray(AVAILABLE_SKILL_NAME_ARRAY, availableSkillNameArray);
         // Fragmentの作成
-        ParentCustomDialogFragment fragment = new ParentCustomDialogFragment();
+        ChildDialogFragment fragment = new ChildDialogFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -50,8 +39,6 @@ public class ParentCustomDialogFragment extends BaseCustomDialogFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            maxCallCount = getArguments().getInt(MAX_CALL_COUNT);
-            skillPoint = getArguments().getInt(SKILL_POINT);
             availableSkillNameArray = getArguments().getStringArray(AVAILABLE_SKILL_NAME_ARRAY);
         }
     }
@@ -60,58 +47,24 @@ public class ParentCustomDialogFragment extends BaseCustomDialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
         // ボタンにリスナーをセット
-        customDialog.setContentView(R.layout.dialog_custom_parent);
-        customDialog.findViewById(R.id.callImageButton).setOnTouchListener(callEventListener);
+        customDialog.setContentView(R.layout.dialog_child);
         customDialog.findViewById(R.id.skillImageButton).setOnTouchListener(skillEventListener);
+        customDialog.findViewById(R.id.chargeImageButton).setOnTouchListener(chargeEventListener);
         return customDialog;
     }
 
-    View.OnTouchListener callEventListener = new View.OnTouchListener() {
+    private View.OnTouchListener chargeEventListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View view, MotionEvent event) {
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                customDialog.findViewById(R.id.callImageButton).setBackgroundColor(0xFFCCFF90);
+                customDialog.findViewById(R.id.chargeImageButton).setBackgroundColor(0xFFCCFF90);
             } else if(event.getAction() == MotionEvent.ACTION_UP) {
-                customDialog.findViewById(R.id.callImageButton).setBackgroundColor(Color.WHITE);
+                customDialog.findViewById(R.id.chargeImageButton).setBackgroundColor(Color.WHITE);
                 final List<Integer> checkedItems = new ArrayList<>();
                 checkedItems.add(0);
                 new AlertDialog.Builder(getActivity())
-                        .setTitle("コールしたい数を選んでね！")
-                        .setSingleChoiceItems(createRangeLabel(0, maxCallCount), 0, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                checkedItems.clear();
-                                checkedItems.add(which);
-                            }
-                        })
-                        .setPositiveButton("コール！", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                if (!checkedItems.isEmpty()) {
-                                    // callCountをActivityに戻す
-                                    motionCount = checkedItems.get(0);
-                                    // 0: Callモード
-                                    decidedMotion(0);
-                                }
-                            }
-                        })
-                        .show();
-            }
-            return false;
-        }
-    };
-
-    View.OnTouchListener skillEventListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent event) {
-            if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                customDialog.findViewById(R.id.skillImageButton).setBackgroundColor(0xFFCCFF90);
-            } else if(event.getAction() == MotionEvent.ACTION_UP) {
-                customDialog.findViewById(R.id.skillImageButton).setBackgroundColor(Color.WHITE);
-                final List<Integer> checkedItems = new ArrayList<>();
-                checkedItems.add(0);
-                new AlertDialog.Builder(getActivity())
-                        .setTitle("発動したいスキルを選んでね")
+                        .setTitle("☆チャージ")
+                        .setMessage("☆1 チャージ！")
                         .setSingleChoiceItems(availableSkillNameArray, 0, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -119,17 +72,11 @@ public class ParentCustomDialogFragment extends BaseCustomDialogFragment {
                                 checkedItems.add(which);
                             }
                         })
-                        .setPositiveButton("発動！", new DialogInterface.OnClickListener() {
+                        .setPositiveButton("チャージ！", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                if (skillPoint == 0) {
-                                    showAlertDialog("選択できるスキルがありません！", "てなわけで！ごめんね！");
-                                } else {
-                                    // メンバ変数に保管
-                                    motionCount = checkedItems.get(0);
-                                    // 1: Skillモード
-                                    decidedMotion(1);
-                                }
+                                usedSkillIndex = -1;
+                                decidedMotion();
                             }
                         })
                         .show();
@@ -138,40 +85,61 @@ public class ParentCustomDialogFragment extends BaseCustomDialogFragment {
         }
     };
 
-    public void showAlertDialog(String title, String message) {
-        new AlertDialog.Builder(getActivity())
-                .setTitle(title)
-                .setMessage(message)
-                .setPositiveButton("OK", null)
-                .show();
-    }
+    private View.OnTouchListener skillEventListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View view, MotionEvent event) {
+            if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                customDialog.findViewById(R.id.skillImageButton).setBackgroundColor(0xFFCCFF90);
+
+            } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                customDialog.findViewById(R.id.skillImageButton).setBackgroundColor(Color.WHITE);
+
+                final List<Integer> checkedItems = new ArrayList<>();
+                checkedItems.add(0);
+                new AlertDialog.Builder(getActivity())
+                        .setTitle("スキル選択")
+                        .setMessage("◆トラップ: 敵のスキルを反射します")
+                        .setSingleChoiceItems(availableSkillNameArray, 0, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                checkedItems.clear();
+                                checkedItems.add(which);
+                            }
+                        })
+                        .setPositiveButton("スキルを発動！", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                usedSkillIndex = checkedItems.get(0);
+                                decidedMotion();
+                            }
+                        })
+                        .show();
+            }
+            return false;
+        }
+    };
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof ParentCustomDialogFragment.OnFragmentInteractionListener) {
-            mListener = (ParentCustomDialogFragment.OnFragmentInteractionListener) context;
+        if (context instanceof ChildDialogFragment.OnFragmentInteractionListener) {
+            mListener = (ChildDialogFragment.OnFragmentInteractionListener) context;
         } else {
             throw new RuntimeException(context.toString()
                     + " must implement OnFragmentInteractionListener");
         }
     }
 
-    // Activityで定義されているonParentCustomDialogFragmentInteractionをフラグメントから実行できる
-    // 多分Activityの値をゲットしてこれんじゃないか？？！？！
-    // 引数にFragmentの値をセットしてあげればActivityに値を返すこともできるね！！素通りだ！
-    public void decidedMotion(int mode) {
+    public void decidedMotion() {
         customDialog.dismiss();
         if (mListener != null) {
-            mListener.onDecidedParentMotion(mode, motionCount);
+            mListener.onDecidedChildMotion(usedSkillIndex);
         }
     }
 
-    // こいつをActivityで継承して
-    // onParentCustomDialogFragmentInteractionをOverrideする
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onDecidedParentMotion(int motionMode, int motionCount);
+        void onDecidedChildMotion(int usedSkillIndex);
     }
 
     @Override

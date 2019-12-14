@@ -4,12 +4,11 @@
 
     <application
         android:allowBackup="true"
+        android:icon="@drawable/ic_life_round"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:icon="@drawable/ic_life_round"
         android:theme="@style/Theme.AppCompat.DayNight.NoActionBar">
-
-        <activity android:name=".activity.YubisumaActivity"></activity>
+        <activity android:name=".activity.YubisumaActivity" />
         <activity android:name=".activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

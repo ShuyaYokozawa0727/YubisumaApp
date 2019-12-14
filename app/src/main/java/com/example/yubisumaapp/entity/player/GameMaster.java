@@ -110,6 +110,16 @@ public class GameMaster {
         return (Player) members.get(0);
     }
 
+    public Member getParent() {
+        Member parentMember = null;
+        for(Member member : members) {
+            if(member.isParent) {
+                parentMember = member;
+            }
+        }
+        return parentMember;
+    }
+
     public ArrayList<Motion> getMotionList() {
         ArrayList<Motion> motions = new ArrayList<>();
         for(Member member : members) {

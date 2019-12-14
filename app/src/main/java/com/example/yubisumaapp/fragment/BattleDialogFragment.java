@@ -8,7 +8,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.yubisumaapp.R;
@@ -22,7 +21,7 @@ import com.example.yubisumaapp.entity.motion.skill.TsuchiFumazu;
 
 import java.util.ArrayList;
 
-public class BattleCustomDialogFragment extends BaseCustomDialogFragment {
+public class BattleDialogFragment extends BaseDialogFragment {
 
     // バンドルから取り出すためのキー
     private static final String PARENT_INDEX = "PARENT_INDEX";
@@ -33,13 +32,13 @@ public class BattleCustomDialogFragment extends BaseCustomDialogFragment {
     private ArrayList<Motion> motions;
 
     // 必要なデータを用意する
-    public static BattleCustomDialogFragment newInstance(int parentIndex, ArrayList<Motion> motions) {
+    public static BattleDialogFragment newInstance(int parentIndex, ArrayList<Motion> motions) {
         // 引数のセット
         Bundle args = new Bundle();
         args.putInt(PARENT_INDEX, parentIndex);
         args.putSerializable(MOTIONS, motions);
         // Fragmentの作成
-        BattleCustomDialogFragment fragment = new BattleCustomDialogFragment();
+        BattleDialogFragment fragment = new BattleDialogFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -68,7 +67,7 @@ public class BattleCustomDialogFragment extends BaseCustomDialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         super.onCreateDialog(savedInstanceState);
-        customDialog.setContentView(R.layout.dialog_custom_battle);
+        customDialog.setContentView(R.layout.dialog_battle);
         String parentPlayer;
         if(parentIndex == 0) {
             parentPlayer = "あなた";
@@ -84,7 +83,7 @@ public class BattleCustomDialogFragment extends BaseCustomDialogFragment {
         // なんかの処理
 
         // playerのMotionを表示する
-        showMotion(motions.get(0), R.id.playerImageView, R.id.playerActionImageView);
+        showMotion(0, R.id.playerImageView, R.id.playerActionImageView);
 
         // ちょっち遅延したいけど～～～
         try{
@@ -98,26 +97,14 @@ public class BattleCustomDialogFragment extends BaseCustomDialogFragment {
         // なんかの処理
 
         // opponentのMotionを表示する
-        showMotion(motions.get(1), R.id.opponentImageView, R.id.opponentActionImageView);
+        showMotion(1, R.id.opponentImageView, R.id.opponentActionImageView);
 
         return customDialog;
     }
 
-    @Override
-    public void onDismiss(@NonNull DialogInterface dialog) {
-        showResultDialogFragment();
-    }
-
-    // 次のフラグメントを表示
-    private void showResultDialogFragment() {
-        // そのバトルがどうだったか？
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.add(ResultCustomDialogFragment.newInstance(parentIndex, motions),"Battle");
-        transaction.commit();
-    }
-
     // それぞれのMotionを表示する
-    private void showMotion(Motion motion, int actorID, int countID) {
+    private void showMotion(int playerIndex, int actorID, int countID) {
+        Motion motion = motions.get(playerIndex);
         if(motion instanceof Call) {
             Call call = (Call) motion;
             switch(call.getCallCount()) {
@@ -149,11 +136,12 @@ public class BattleCustomDialogFragment extends BaseCustomDialogFragment {
                 ((ImageView) customDialog.findViewById(actorID)).setImageResource(R.drawable.skill_point);
             }
             // Actionの数字を非表示
-            setInvisibleAction(countID);
+            setInvisibleAction(playerIndex, countID);
         } else {
             // ここに入ってくるということはnullか新しいMotion派生クラス
         }
     }
+
     private void setActionImage(int actorID, int countID, int actionCount) {
         switch (actionCount) {
             case 0:
@@ -172,8 +160,23 @@ public class BattleCustomDialogFragment extends BaseCustomDialogFragment {
         }
     }
 
-    private void setInvisibleAction(int countID) {
-        ((ImageView) customDialog.findViewById(R.id.callImageView)).setVisibility(View.INVISIBLE);
+    private void setInvisibleAction(int playerIndex, int countID) {
+        if(playerIndex == parentIndex) {
+            ((ImageView) customDialog.findViewById(R.id.callImageView)).setVisibility(View.INVISIBLE);
+        }
         ((ImageView) customDialog.findViewById(countID)).setVisibility(View.INVISIBLE);
+    }
+
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        showResultDialogFragment();
+    }
+
+    // 次のフラグメントを表示
+    private void showResultDialogFragment() {
+        // そのバトルがどうだったか？
+        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+        transaction.add(ResultDialogFragment.newInstance(parentIndex, motions),"Battle");
+        transaction.commit();
     }
 }

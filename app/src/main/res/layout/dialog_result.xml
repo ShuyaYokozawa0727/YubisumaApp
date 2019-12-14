@@ -66,17 +66,6 @@
             app:layout_constraintTop_toBottomOf="@+id/textView"
             app:srcCompat="@drawable/ic_life_round" />
 
-        <ImageView
-            android:id="@+id/imageView4"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="32dp"
-            android:layout_marginLeft="32dp"
-            android:layout_marginTop="16dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView3"
-            app:srcCompat="@drawable/skill_point" />
-
         <TextView
             android:id="@+id/changePlayerFingerStockTextView"
             android:layout_width="wrap_content"
@@ -87,17 +76,6 @@
             android:textSize="24sp"
             app:layout_constraintStart_toEndOf="@+id/imageView3"
             app:layout_constraintTop_toTopOf="@+id/imageView3" />
-
-        <TextView
-            android:id="@+id/changePlayerSkillPointTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_marginLeft="16dp"
-            android:text="ああ"
-            android:textSize="24sp"
-            app:layout_constraintStart_toEndOf="@+id/imageView4"
-            app:layout_constraintTop_toTopOf="@+id/imageView4" />
 
         <ImageView
             android:id="@+id/imageView5"
@@ -110,17 +88,6 @@
             app:layout_constraintTop_toBottomOf="@+id/textView1"
             app:srcCompat="@drawable/ic_life_round" />
 
-        <ImageView
-            android:id="@+id/imageView6"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="32dp"
-            android:layout_marginRight="32dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/imageView5"
-            app:srcCompat="@drawable/skill_point" />
-
         <TextView
             android:id="@+id/changeOpponentFingerStockTextView"
             android:layout_width="wrap_content"
@@ -131,17 +98,6 @@
             android:textSize="24sp"
             app:layout_constraintEnd_toStartOf="@+id/imageView5"
             app:layout_constraintTop_toTopOf="@+id/imageView5" />
-
-        <TextView
-            android:id="@+id/changeOpponentSkillPointTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginEnd="16dp"
-            android:layout_marginRight="16dp"
-            android:text="ああ"
-            android:textSize="24sp"
-            app:layout_constraintEnd_toStartOf="@+id/imageView6"
-            app:layout_constraintTop_toTopOf="@+id/imageView6" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -17,19 +17,22 @@ import com.example.yubisumaapp.R;
 import com.example.yubisumaapp.databinding.ActivityYubisumaBinding;
 import com.example.yubisumaapp.entity.motion.Action;
 import com.example.yubisumaapp.entity.motion.Call;
+import com.example.yubisumaapp.entity.motion.skill.ChouChou;
+import com.example.yubisumaapp.entity.motion.skill.TsuchiFumazu;
 import com.example.yubisumaapp.entity.player.GameMaster;
 import com.example.yubisumaapp.entity.player.Member;
-import com.example.yubisumaapp.fragment.BattleCustomDialogFragment;
-import com.example.yubisumaapp.fragment.ChildCustomDialogFragment;
-import com.example.yubisumaapp.fragment.ParentCustomDialogFragment;
-import com.example.yubisumaapp.fragment.ResultCustomDialogFragment;
+import com.example.yubisumaapp.fragment.BattleDialogFragment;
+import com.example.yubisumaapp.fragment.ChildDialogFragment;
+import com.example.yubisumaapp.fragment.ParentDialogFragment;
+import com.example.yubisumaapp.fragment.PopUpDialogFragment;
+import com.example.yubisumaapp.fragment.ResultDialogFragment;
 import com.example.yubisumaapp.utility.UIDrawer;
 
 public class YubisumaActivity
         extends AppCompatActivity
-        implements ParentCustomDialogFragment.OnFragmentInteractionListener
-                 , ChildCustomDialogFragment.OnFragmentInteractionListener
-                 , ResultCustomDialogFragment.OnFragmentInteractionListener
+        implements ParentDialogFragment.OnFragmentInteractionListener
+                 , ChildDialogFragment.OnFragmentInteractionListener
+                 , ResultDialogFragment.OnFragmentInteractionListener
 {
     // こっから本文
     public static final int ICON_SIZE = 7;
@@ -40,12 +43,26 @@ public class YubisumaActivity
     private ActivityYubisumaBinding binding;
     private UIDrawer UIDrawer;
 
-    private MediaPlayer soundOne, soundTwo;
+    private MediaPlayer soundYubisuma
+            , soundZero, soundOne, soundTwo, soundThree, soundFour
+            , soundTuti, soundChocho;
 
     private int rightFinger=1, leftFinger=1;
 
     private boolean playingSound = false;
     private boolean leaveFingers = true;
+
+    private void loadSounds() {
+        // 音声ファイルをロード
+        soundYubisuma = MediaPlayer.create(this, R.raw.yubisuma);
+        soundZero = MediaPlayer.create(this, R.raw.zero);
+        soundOne = MediaPlayer.create(this, R.raw.one);
+        soundTwo = MediaPlayer.create(this, R.raw.two);
+        soundThree = MediaPlayer.create(this, R.raw.three);
+        soundFour = MediaPlayer.create(this, R.raw.four);
+        soundTuti = MediaPlayer.create(this, R.raw.tuti);
+        soundChocho = MediaPlayer.create(this, R.raw.chocho);
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -63,9 +80,8 @@ public class YubisumaActivity
         leftFinger = UIDrawer.checkFingerStock(gameMaster.getPlayer().fingerStock);
         UIDrawer.setUpUI(gameMaster.getMembers());
 
-        // 音声ファイルをロード
-        soundOne = MediaPlayer.create(this, R.raw.conch1);
-        soundTwo = MediaPlayer.create(this, R.raw.roll_finish1);
+        // ここで一気にロードしておく
+        loadSounds();
 
         // Touchイベントリスナーのセット
         binding.leftFingerImageButton.setOnTouchListener(new View.OnTouchListener() {
@@ -147,24 +163,50 @@ public class YubisumaActivity
         });
 
         // 再生終了イベントリスナー（Actionを確定する）
-        soundOne.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        soundYubisuma.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 // 音声終了
                 playingSound = false;
-                // シンバル再生
-                soundTwo.start();
 
                 // Actionを決定する
                 gameMaster.addAction(new Action(rightFinger+leftFinger));
                 gameMaster.determineCPUMotion();
-                // 両者のMotionは確定したのでバトル開始
-                showBattleDialogFragment();
+
+                playSounds();
+
+                // 両者のMotionは確定したのでバトル開始（Fragment表示）
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.add(BattleDialogFragment.newInstance(gameMaster.parentIndex, gameMaster.getMotionList()),"Battle");
+                transaction.commit();
             }
+
+            private void playSounds() {
+                // 数のボイス再生
+                if(gameMaster.getParent().hasCall()) {
+                    switch (gameMaster.getParent().getCall().getCallCount()) {
+                        case 0 : soundZero.start(); break;
+                        case 1 : soundOne.start(); break;
+                        case 2 : soundTwo.start(); break;
+                        case 3 : soundThree.start(); break;
+                        case 4 : soundFour.start(); break;
+                    }
+                } else if (gameMaster.getParent().hasSkill()){
+                    if(gameMaster.getParent().getSkill() instanceof TsuchiFumazu) {
+                        soundTuti.start();
+                    } else if(gameMaster.getParent().getSkill() instanceof ChouChou) {
+                        soundChocho.start();
+                    }
+                }
+            }
+
         });
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.add(PopUpDialogFragment.newInstance("枠外をタップしてね！", "ポップアップを消したい時"), "PopUp");
+        transaction.commit();
     }
 
-    // 行動選択画面表示
+    // Motion選択ダイアログ表示
     private void showMotionSelectDialogFragment() {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         // 発動可能なスキル名一覧
@@ -174,33 +216,36 @@ public class YubisumaActivity
             // 必要なステータスをFragmentに渡す
             int totalFingerCount = gameMaster.getTotalFingerCount();
             int skillPoint = gameMaster.getPlayer().skillPoint;
-            transaction.add(ParentCustomDialogFragment.newInstance(totalFingerCount, skillPoint, availableSkillNameArray),"Parent");
+            transaction.add(ParentDialogFragment.newInstance(totalFingerCount, skillPoint, availableSkillNameArray),"Parent");
         } else {
-            transaction.add(ChildCustomDialogFragment.newInstance(availableSkillNameArray),"Child");
+            transaction.add(ChildDialogFragment.newInstance(availableSkillNameArray),"Child");
         }
         transaction.commit();
     }
 
-    // Fragmentから呼び出されます。
+    // ChildCustomDialogFragmentから呼び出されます。
+    // 子としてのMotionが決まった
+    @Override
+    public void onDecidedChildMotion(int usedSkillIndex) {
+        playYubisuma();
+        // -1はスキルを発動しない
+        gameMaster.getPlayer().setSkill(usedSkillIndex);
+    }
+
+    // ParentCustomDialogFragmentから呼び出されます。
+    // 親としてのMotionが決まった
     @Override
     public void onDecidedParentMotion(int motionMode, int motionCount) {
-        playSound();
+        playYubisuma();
         // 0: Callを選択したパターン
         // 1: Skillを選択したパターン
         if(motionMode == 0) gameMaster.getPlayer().setMotion(new Call(motionCount));
         if(motionMode == 1) gameMaster.getPlayer().setSkill(motionCount);
     }
 
-    @Override
-    public void onDecidedChildMotion(int usedSkillIndex) {
-        playSound();
-        // -1はスキルを発動しない
-        gameMaster.getPlayer().setSkill(usedSkillIndex);
-    }
-
-    private void playSound() {
+    private void playYubisuma() {
         // 音声再生
-        soundOne.start();
+        soundYubisuma.start();
         playingSound = true;
         binding.playerMotionTextView.setText("音が流れているよ！");
         binding.opponentMotionTextView.setText("音が流れているよ！");
@@ -209,13 +254,7 @@ public class YubisumaActivity
         binding.wantToDoLeftTextView.setText("");
     }
 
-    private void showBattleDialogFragment() {
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.add(BattleCustomDialogFragment.newInstance(gameMaster.parentIndex, gameMaster.getMotionList()),"Battle");
-        transaction.commit();
-    }
-
-    // ResultFragmentから呼ばれます
+    // ResultDialogFragmentから呼ばれます
     @Override
     public void onDismissResultDialog(int playerChangeFS, int playerChangeSP, int opponentChangeFS, int opponentChangeSP) {
         // 変化を反映

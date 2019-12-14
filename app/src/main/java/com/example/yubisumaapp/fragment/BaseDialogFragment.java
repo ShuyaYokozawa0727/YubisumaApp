@@ -9,7 +9,7 @@ import android.view.WindowManager;
 
 import androidx.fragment.app.DialogFragment;
 
-public class BaseCustomDialogFragment extends DialogFragment {
+public class BaseDialogFragment extends DialogFragment {
     public Dialog customDialog;
 
     // ダイアログが表示された時点で呼び出される？？
