@@ -80,6 +80,7 @@ public class YubisumaActivity
         soundBGM.pause();
     }
 
+
     @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,83 +101,10 @@ public class YubisumaActivity
         loadSounds();
 
         // Touchイベントリスナーのセット
-        binding.leftFingerImageButton.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                // キーから指が離されたら連打をオフにする
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    leftFinger = 0;
-                    binding.leftFingerImageButton.setImageResource(R.drawable.guu_right);
-                    if (!playingSound) {
-                        binding.wantToDoLeftTextView.setText("");
-                    }
-                } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    leftFinger = 1;
-                    binding.leftFingerImageButton.setImageResource(R.drawable.good_right);
-                    if (!playingSound) {
-                        // 非表示ではなければ
-                        if (binding.leftFingerImageButton.getVisibility() != View.INVISIBLE) {
-                            binding.wantToDoLeftTextView.setText(R.string.tap_start);
-                        }
-                    }
-                }
-                return false;
-            }
-        });
+        binding.leftFingerImageButton.setOnTouchListener(setOnLeftTouchListener());
 
         // DialogFragment表示
-        binding.rightFingerImageButton.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    rightFinger = 0;
-                    binding.rightFingerImageButton.setImageResource(R.drawable.guu_left);
-                    if(!playingSound) {
-                        binding.wantToDoRightTextView.setText("");
-                    }
-                } else if(event.getAction() == MotionEvent.ACTION_UP){
-                    rightFinger = 1;
-                    binding.rightFingerImageButton.setImageResource(R.drawable.good_left);
-                    if(!playingSound) {
-                        if(binding.rightFingerImageButton.getVisibility() != View.INVISIBLE) {
-                            binding.wantToDoRightTextView.setText(R.string.tap_start);
-                        }
-                    }
-                }
-
-                /* この辺結構めんどいな整理しよう */
-                boolean showDialog = false;
-                if(!playingSound) {
-                    if(binding.leftFingerImageButton.getVisibility() == View.INVISIBLE) {
-                        if (rightFinger==0 && leaveFingers) {
-                            showDialog = true;
-                        }
-                        if (rightFinger==1) {
-                            leaveFingers = true;
-                        }
-                    } else if(binding.rightFingerImageButton.getVisibility() == View.INVISIBLE) {
-                        if (leftFinger==0 && leaveFingers) {
-                            showDialog = true;
-                        }
-                        if (leftFinger==1) {
-                            leaveFingers = true;
-                        }
-                    } else {
-                        if (rightFinger==0 && leftFinger==0 && leaveFingers) {
-                            showDialog = true;
-                        }
-                        if(rightFinger==1 && leftFinger==1) {
-                            leaveFingers = true;
-                        }
-                    }
-                }
-                if(showDialog) {
-                    leaveFingers = false;
-                    showMotionSelectDialogFragment(); // フラグメントから音声再生は呼び出される
-                }
-                return false;
-            }
-        });
+        binding.rightFingerImageButton.setOnTouchListener(setOnRightTouchListener());
 
         // 再生終了イベントリスナー（Actionを確定する）
         soundYubisuma.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
@@ -330,4 +258,88 @@ public class YubisumaActivity
                 .setCancelable(false)
                 .show();
     }
+
+    /* ここから両手の処理 */
+
+    private View.OnTouchListener setOnLeftTouchListener() {
+        return new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                // キーから指が離されたら連打をオフにする
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    leftFinger = 0;
+                    binding.leftFingerImageButton.setImageResource(R.drawable.guu_right);
+                    if (!playingSound) {
+                        binding.wantToDoLeftTextView.setText("");
+                    }
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    leftFinger = 1;
+                    binding.leftFingerImageButton.setImageResource(R.drawable.good_right);
+                    if (!playingSound) {
+                        // 非表示ではなければ
+                        if (binding.leftFingerImageButton.getVisibility() != View.INVISIBLE) {
+                            binding.wantToDoLeftTextView.setText(R.string.tap_start);
+                        }
+                    }
+                }
+                return false;
+            }
+        };
+    }
+
+    private View.OnTouchListener setOnRightTouchListener() {
+        return new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    rightFinger = 0;
+                    binding.rightFingerImageButton.setImageResource(R.drawable.guu_left);
+                    if(!playingSound) {
+                        binding.wantToDoRightTextView.setText("");
+                    }
+                } else if(event.getAction() == MotionEvent.ACTION_UP){
+                    rightFinger = 1;
+                    binding.rightFingerImageButton.setImageResource(R.drawable.good_left);
+                    if(!playingSound) {
+                        if(binding.rightFingerImageButton.getVisibility() != View.INVISIBLE) {
+                            binding.wantToDoRightTextView.setText(R.string.tap_start);
+                        }
+                    }
+                }
+
+                /* この辺結構めんどいな整理しよう */
+                boolean showDialog = false;
+                if(!playingSound) {
+                    if(binding.leftFingerImageButton.getVisibility() == View.INVISIBLE) {
+                        if (rightFinger==0 && leaveFingers) {
+                            showDialog = true;
+                        }
+                        if (rightFinger==1) {
+                            leaveFingers = true;
+                        }
+                    } else if(binding.rightFingerImageButton.getVisibility() == View.INVISIBLE) {
+                        if (leftFinger==0 && leaveFingers) {
+                            showDialog = true;
+                        }
+                        if (leftFinger==1) {
+                            leaveFingers = true;
+                        }
+                    } else {
+                        if (rightFinger==0 && leftFinger==0 && leaveFingers) {
+                            showDialog = true;
+                        }
+                        if(rightFinger==1 && leftFinger==1) {
+                            leaveFingers = true;
+                        }
+                    }
+                }
+                if(showDialog) {
+                    leaveFingers = false;
+                    showMotionSelectDialogFragment(); // フラグメントから音声再生は呼び出される
+                }
+                return false;
+            }
+        };
+    }
+
 }
