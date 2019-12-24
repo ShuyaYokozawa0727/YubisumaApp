@@ -14,8 +14,8 @@ import com.example.yubisumaapp.entity.motion.Action;
 import com.example.yubisumaapp.entity.motion.Call;
 import com.example.yubisumaapp.entity.motion.skill.Skill;
 import com.example.yubisumaapp.entity.player.CPU;
-import com.example.yubisumaapp.entity.player.Member;
 import com.example.yubisumaapp.entity.player.Player;
+import com.example.yubisumaapp.entity.player.User;
 
 import java.util.ArrayList;
 
@@ -67,7 +67,7 @@ public class UIDrawer {
         return defaultFinger;
     }
 
-    public void setUpUI(ArrayList<Member> members) {
+    public void setUpUI(ArrayList<Player> players) {
         // レイアウト初期化
         binding.playerFingerStockLayout.removeAllViews();
         binding.playerSkillPointLayout.removeAllViews();
@@ -85,25 +85,25 @@ public class UIDrawer {
         }
 
         // プレイヤーごとのUIを更新
-        for(Member member : members) {
-            int fingerStock = member.fingerStock;
-            int skillPoint = member.skillPoint;
+        for(Player player : players) {
+            int fingerStock = player.fingerStock;
+            int skillPoint = player.skillPoint;
             // モーションログテキストを初期化・セット
             String text = "";
-            if(member.getMotion()!=null) {
-                if(member.hasAction()) {
-                    Action playerAction = member.getAction();
+            if(player.getMotion()!=null) {
+                if(player.hasAction()) {
+                    Action playerAction = player.getAction();
                     text = "Action : " + playerAction.getStandCount();
-                } else if(member.hasCall()) {
-                    Call playerCall = member.getCall();
+                } else if(player.hasCall()) {
+                    Call playerCall = player.getCall();
                     text = "Action : "+ playerCall.getAction().getStandCount() + " / Call : " +playerCall.getCallCount();
-                } else if(member.hasSkill()) {
-                    Skill playerSkill = member.getSkill();
+                } else if(player.hasSkill()) {
+                    Skill playerSkill = player.getSkill();
                     text = "Skill : " + playerSkill.getSkillName();
                 }
             }
             // アイコンリストを作成
-            if(member instanceof CPU) {
+            if(player instanceof CPU) {
                 binding.opponentMotionTextView.setText(text);
                 for(int index=0; index < fingerStock; index++) binding.opponentFingerStockLayout.addView(opponentFingerStockIconList.get(index));
                 for(int index=0; index < skillPoint; index++) binding.opponentSkillPointLayout.addView(opponentSkillPointIconList.get(index));
@@ -116,16 +116,16 @@ public class UIDrawer {
     }
 
     // プレイヤーごとではなく、必要なパラメータのみにする
-    public void setTurnLog(int turn, Player player, Player opponent) {
+    public void setTurnLog(int turn, User user, User opponent) {
         // ステータスの変化
-        int changePlayerFingerStock = player.fingerStock - player.beforeFingerStock;
-        int changePlayerSkillPoint = player.skillPoint - player.beforeSkillPoint;
+        int changePlayerFingerStock = user.fingerStock - user.beforeFingerStock;
+        int changePlayerSkillPoint = user.skillPoint - user.beforeSkillPoint;
         // ステータスの変化
         int changeOpponentFingerStock = opponent.fingerStock - opponent.beforeFingerStock;
         int changeOpponentSkillPoint = opponent.skillPoint - opponent.beforeSkillPoint;
 
         // ログをセット(DBを意識！)
-        String playerChangeStatus = "P_"+player.getSkillName()+"_"+player.fingerStock+"_"+player.skillPoint+"_"+changePlayerFingerStock+"_"+changePlayerSkillPoint;
+        String playerChangeStatus = "P_"+ user.getSkillName()+"_"+ user.fingerStock+"_"+ user.skillPoint+"_"+changePlayerFingerStock+"_"+changePlayerSkillPoint;
         String opponentChangeStatus = "O_"+opponent.getSkillName()+"_"+opponent.fingerStock+"_"+opponent.skillPoint+"_"+changeOpponentFingerStock+"_"+changeOpponentSkillPoint;
         logText += (turn + "," + playerChangeStatus+","+opponentChangeStatus + "\n") ;
         binding.logTextView.setText(logText);
@@ -139,7 +139,7 @@ public class UIDrawer {
             // ImageViewのインスタンス生成
             ImageView imageView = new ImageView(context);
             // 画像をセット
-            imageView.setImageResource(R.drawable.ic_life_round);
+            imageView.setImageResource(R.drawable.good_right_icon);
             imageView.setLayoutParams(layoutWCParams);
             // とりあえずリストに追加
             playerFingerStockIconList.add(imageView);
@@ -165,7 +165,7 @@ public class UIDrawer {
             // ImageViewのインスタンス生成
             ImageView imageView = new ImageView(context);
             // 画像をセット
-            imageView.setImageResource(R.drawable.ic_life_round);
+            imageView.setImageResource(R.drawable.good_left_icon);
             imageView.setLayoutParams(layoutWCParams);
             // とりあえずリストに追加
             opponentFingerStockIconList.add(imageView);

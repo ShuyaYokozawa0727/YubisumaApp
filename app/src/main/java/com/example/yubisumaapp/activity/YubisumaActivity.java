@@ -20,7 +20,7 @@ import com.example.yubisumaapp.entity.motion.Call;
 import com.example.yubisumaapp.entity.motion.skill.ChouChou;
 import com.example.yubisumaapp.entity.motion.skill.TsuchiFumazu;
 import com.example.yubisumaapp.entity.player.GameMaster;
-import com.example.yubisumaapp.entity.player.Member;
+import com.example.yubisumaapp.entity.player.Player;
 import com.example.yubisumaapp.fragment.BattleDialogFragment;
 import com.example.yubisumaapp.fragment.ChildDialogFragment;
 import com.example.yubisumaapp.fragment.ParentDialogFragment;
@@ -43,7 +43,8 @@ public class YubisumaActivity
     private ActivityYubisumaBinding binding;
     private UIDrawer UIDrawer;
 
-    private MediaPlayer soundYubisuma
+    private MediaPlayer
+              soundYubisuma, soundBGM
             , soundZero, soundOne, soundTwo, soundThree, soundFour
             , soundTuti, soundChocho;
 
@@ -54,6 +55,9 @@ public class YubisumaActivity
 
     private void loadSounds() {
         // 音声ファイルをロード
+        soundBGM = MediaPlayer.create(this, R.raw.bgm_dropout);
+        soundBGM.setVolume(0.6f, 0.6f);
+        soundBGM.setLooping(true);
         soundYubisuma = MediaPlayer.create(this, R.raw.yubisuma);
         soundZero = MediaPlayer.create(this, R.raw.zero);
         soundOne = MediaPlayer.create(this, R.raw.one);
@@ -62,6 +66,18 @@ public class YubisumaActivity
         soundFour = MediaPlayer.create(this, R.raw.four);
         soundTuti = MediaPlayer.create(this, R.raw.tuti);
         soundChocho = MediaPlayer.create(this, R.raw.chocho);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        soundBGM.start();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        soundBGM.pause();
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -78,7 +94,7 @@ public class YubisumaActivity
 
         // UI関係のセットアップ
         leftFinger = UIDrawer.checkFingerStock(gameMaster.getPlayer().fingerStock);
-        UIDrawer.setUpUI(gameMaster.getMembers());
+        UIDrawer.setUpUI(gameMaster.getPlayers());
 
         // ここで一気にロードしておく
         loadSounds();
@@ -90,13 +106,13 @@ public class YubisumaActivity
                 // キーから指が離されたら連打をオフにする
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     leftFinger = 0;
-                    binding.leftFingerImageButton.setImageResource(R.drawable.guu);
+                    binding.leftFingerImageButton.setImageResource(R.drawable.guu_right);
                     if (!playingSound) {
                         binding.wantToDoLeftTextView.setText("");
                     }
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     leftFinger = 1;
-                    binding.leftFingerImageButton.setImageResource(R.drawable.good);
+                    binding.leftFingerImageButton.setImageResource(R.drawable.good_right);
                     if (!playingSound) {
                         // 非表示ではなければ
                         if (binding.leftFingerImageButton.getVisibility() != View.INVISIBLE) {
@@ -114,13 +130,13 @@ public class YubisumaActivity
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     rightFinger = 0;
-                    binding.rightFingerImageButton.setImageResource(R.drawable.guu_rev);
+                    binding.rightFingerImageButton.setImageResource(R.drawable.guu_left);
                     if(!playingSound) {
                         binding.wantToDoRightTextView.setText("");
                     }
                 } else if(event.getAction() == MotionEvent.ACTION_UP){
                     rightFinger = 1;
-                    binding.rightFingerImageButton.setImageResource(R.drawable.good_rev);
+                    binding.rightFingerImageButton.setImageResource(R.drawable.good_left);
                     if(!playingSound) {
                         if(binding.rightFingerImageButton.getVisibility() != View.INVISIBLE) {
                             binding.wantToDoRightTextView.setText(R.string.tap_start);
@@ -266,7 +282,7 @@ public class YubisumaActivity
         gameMaster.endTurn();
         // UI更新
         leftFinger = UIDrawer.checkFingerStock(gameMaster.getPlayer().fingerStock);
-        UIDrawer.setUpUI(gameMaster.getMembers());
+        UIDrawer.setUpUI(gameMaster.getPlayers());
         UIDrawer.setTurnLog(gameMaster.getTurnCount(), gameMaster.getPlayer(), gameMaster.getOpponent());
 
         // ゲーム終了チェック
@@ -284,8 +300,8 @@ public class YubisumaActivity
     private void showResult() {
         String message = "";
         // TODO:複数人対応
-        for(Member clearMember : gameMaster.getClearMembers()) {
-            if (clearMember.isCPU()) {
+        for(Player clearPlayer : gameMaster.getClearPlayers()) {
+            if (clearPlayer.isCPU()) {
                 message = " おれじぇねぇぇぇえ！！";
             } else {
                 message = " 俺！！！";

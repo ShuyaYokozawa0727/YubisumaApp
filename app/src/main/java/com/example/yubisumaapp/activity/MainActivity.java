@@ -14,7 +14,6 @@ public class MainActivity extends AppCompatActivity {
 
     private Context context;
     private Button gameStart;
-    private Button ruru;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

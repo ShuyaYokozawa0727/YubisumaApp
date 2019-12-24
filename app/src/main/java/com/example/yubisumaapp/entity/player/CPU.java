@@ -2,11 +2,8 @@ package com.example.yubisumaapp.entity.player;
 
 import com.example.yubisumaapp.entity.motion.Action;
 import com.example.yubisumaapp.entity.motion.Call;
-import com.example.yubisumaapp.entity.motion.Motion;
-import com.example.yubisumaapp.entity.motion.skill.Skill;
 import com.example.yubisumaapp.entity.motion.skill.SkillManager;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 /*
@@ -21,18 +18,18 @@ import java.util.Random;
  * 各状況に重み付けが必要
  *
  */
-public class CPU extends Player {
+public class CPU extends User {
 
     private Random random = new Random();
-    private Member member;
+    private Player player;
     private int totalFingerCount;
 
     public CPU(int skillPoint, int fingerStock, int playerIndex) {
         super(skillPoint, fingerStock, playerIndex);
     }
 
-    void createCPUMotion(Member member, int totalFingerCount) {
-        this.member = member;
+    void createCPUMotion(Player player, int totalFingerCount) {
+        this.player = player;
         this.totalFingerCount = totalFingerCount;
         motion = null;
         if (isParent) {
@@ -59,7 +56,7 @@ public class CPU extends Player {
     }
     private void childMotion() {
         // もし今の親のスキルポイントが0ならば
-        if(member.skillPoint == 0) {
+        if(player.skillPoint == 0) {
             this.setMotion(new Action(random.nextInt(getMyFingerCount())));
         } else  {
             // 今の親のスキルポイントが1以上

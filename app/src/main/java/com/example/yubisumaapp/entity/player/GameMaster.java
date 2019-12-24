@@ -11,32 +11,32 @@ public class GameMaster {
     private int turnCount = 0; // ターン開始時にインクリメント
     private int totalFingerCount = 0; // ターン開始時にチェック
     // 初期参加数
-    private int memberSizeAtStart = 0;
+    private int playerSizeAtStart = 0;
     // 親は誰か
     public int parentIndex;
 
     public boolean inGame = true; // ターン終了時にチェック
 
-    private ArrayList<Member> members = new ArrayList<>();
-    private ArrayList<Member> clearMembers = new ArrayList<>();
+    private ArrayList<Player> players = new ArrayList<>();
+    private ArrayList<Player> clearPlayers = new ArrayList<>();
 
-    public GameMaster(int memberSize) {
-        createMembers(memberSize);
-        parentIndex = new Random().nextInt(memberSize); // 初期値はランダム
+    public GameMaster(int playerSize) {
+        createPlayers(playerSize);
+        parentIndex = new Random().nextInt(playerSize); // 初期値はランダム
         setupNewTurn();
      }
 
     // 一人対戦
     // プレイヤーを作成する
-    private void createMembers(int memberSize) {
-        this.memberSizeAtStart = memberSize;
+    private void createPlayers(int playerSize) {
+        this.playerSizeAtStart = playerSize;
         // 初期設定
         int skillPoint = 2;
         int fingerCount = 5;
-        members.add(new Player(skillPoint, fingerCount, 0));
-        members.add(new CPU(skillPoint, fingerCount, 1));
+        players.add(new User(skillPoint, fingerCount, 0));
+        players.add(new CPU(skillPoint, fingerCount, 1));
         /*for(int index=1; index < playerSize; index++) {
-            members.add(new CPU(skillPoint, fingerCount, index));
+            players.add(new CPU(skillPoint, fingerCount, index));
         }*/
     }
 
@@ -45,44 +45,44 @@ public class GameMaster {
         turnCount++;
         findNextParent();
         // プレイヤー達の開始処理
-        for(Member member : members) {
-            member.setupTurn();
+        for(Player player : players) {
+            player.setupTurn();
         }
         setTotalFingerSize();
     }
 
     public void endTurn() {
-        for(Member member : members) {
-            member.turnEnd();
+        for(Player player : players) {
+            player.turnEnd();
         }
     }
 
     public void checkGameEnd() {
         // プレイヤーがクリアしたかチェック
-        for(Member member : members) {
-            if(member.isClear) clearMembers.add(member);
+        for(Player player : players) {
+            if(player.isClear) clearPlayers.add(player);
         }
         // クリアしたプレイヤーを削除
-        for(Member clearPlayer : clearMembers) {
-            members.remove(clearPlayer);
+        for(Player clearPlayer : clearPlayers) {
+            players.remove(clearPlayer);
         }
-        if(clearMembers.size() == memberSizeAtStart -1) {
+        if(clearPlayers.size() == playerSizeAtStart -1) {
             inGame = false;
         }
     }
 
     private void findNextParent() {
-        parentIndex = (parentIndex +1) % members.size();
-        for(Member member : members) {
-            if(member.memberIndex == parentIndex) {
-                if(member.isClear) {
+        parentIndex = (parentIndex +1) % players.size();
+        for(Player player : players) {
+            if(player.playerIndex == parentIndex) {
+                if(player.isClear) {
                     // 複数プレイヤー対応したらどうなるかな～
                     findNextParent();
                 } else {
-                    member.isParent = true;
+                    player.isParent = true;
                 }
             } else {
-                member.isParent = false;
+                player.isParent = false;
             }
         }
     }
@@ -106,44 +106,44 @@ public class GameMaster {
     }
 
     // Playerは必ずindex = 0
-    public Player getPlayer() {
-        return (Player) members.get(0);
+    public User getPlayer() {
+        return (User) players.get(0);
     }
 
-    public Member getParent() {
-        Member parentMember = null;
-        for(Member member : members) {
-            if(member.isParent) {
-                parentMember = member;
+    public Player getParent() {
+        Player parentPlayer = null;
+        for(Player player : players) {
+            if(player.isParent) {
+                parentPlayer = player;
             }
         }
-        return parentMember;
+        return parentPlayer;
     }
 
     public ArrayList<Motion> getMotionList() {
         ArrayList<Motion> motions = new ArrayList<>();
-        for(Member member : members) {
-            motions.add(member.getMotion());
+        for(Player player : players) {
+            motions.add(player.getMotion());
         }
         return motions;
     }
 
     // 二人用専用
-    public Player getOpponent() { return (Player)members.get(1); }
+    public User getOpponent() { return (User) players.get(1); }
 
-    public ArrayList<Member> getMembers() {
-        return members;
+    public ArrayList<Player> getPlayers() {
+        return players;
     }
 
-    public ArrayList<Member> getClearMembers() {
-        return clearMembers;
+    public ArrayList<Player> getClearPlayers() {
+        return clearPlayers;
     }
 
     // 場の指の本数を数える
     private void setTotalFingerSize() {
         totalFingerCount = 0;
-        for(Member member : members) {
-            totalFingerCount += member.getMyFingerCount();
+        for(Player player : players) {
+            totalFingerCount += player.getMyFingerCount();
         }
     }
 

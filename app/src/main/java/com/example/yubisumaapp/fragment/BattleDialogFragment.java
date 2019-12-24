@@ -90,7 +90,7 @@ public class BattleDialogFragment extends BaseDialogFragment {
             Thread.sleep(1);
         }catch(InterruptedException e){
             /* そのエラーのときにする処理 */
-            System.err.println( "エラーが起きたよ！！" );  // 例
+            System.err.println("エラーが起きたよ！！" );  // 例
         }
 
         // TODO: カットイン 「あいてのMotion!」
@@ -136,7 +136,7 @@ public class BattleDialogFragment extends BaseDialogFragment {
                 ((ImageView) customDialog.findViewById(actorID)).setImageResource(R.drawable.skill_point);
             }
             // Actionの数字を非表示
-            setInvisibleAction(playerIndex, countID);
+            setVisibilityAction(playerIndex, countID, View.INVISIBLE);
         } else {
             // ここに入ってくるということはnullか新しいMotion派生クラス
         }
@@ -145,11 +145,11 @@ public class BattleDialogFragment extends BaseDialogFragment {
     private void setActionImage(int actorID, int countID, int actionCount) {
         switch (actionCount) {
             case 0:
-                ((ImageView) customDialog.findViewById(actorID)).setImageResource(R.drawable.guu);
+                ((ImageView) customDialog.findViewById(actorID)).setImageResource(R.drawable.guu_right);
                 ((ImageView)customDialog.findViewById(countID)).setImageResource(R.drawable.count0);
                 break;
             case 1:
-                ((ImageView) customDialog.findViewById(actorID)).setImageResource(R.drawable.good);
+                ((ImageView) customDialog.findViewById(actorID)).setImageResource(R.drawable.good_right);
                 ((ImageView)customDialog.findViewById(countID)).setImageResource(R.drawable.count1);
                 break;
             case 2:
@@ -160,11 +160,11 @@ public class BattleDialogFragment extends BaseDialogFragment {
         }
     }
 
-    private void setInvisibleAction(int playerIndex, int countID) {
+    private void setVisibilityAction(int playerIndex, int countID, int visibility) {
         if(playerIndex == parentIndex) {
-            ((ImageView) customDialog.findViewById(R.id.callImageView)).setVisibility(View.INVISIBLE);
+            ((ImageView) customDialog.findViewById(R.id.callImageView)).setVisibility(visibility);
         }
-        ((ImageView) customDialog.findViewById(countID)).setVisibility(View.INVISIBLE);
+        ((ImageView) customDialog.findViewById(countID)).setVisibility(visibility);
     }
 
     @Override

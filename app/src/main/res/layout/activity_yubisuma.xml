@@ -155,7 +155,7 @@
             app:layout_constraintBottom_toTopOf="@+id/playerSkillPointLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/playerMotionTextView"
-            app:srcCompat="@drawable/good_rev" />
+            app:srcCompat="@drawable/good_left" />
 
         <ImageButton
             android:id="@+id/leftFingerImageButton"
@@ -168,7 +168,7 @@
             app:layout_constraintBottom_toTopOf="@+id/playerSkillPointLayout"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/playerMotionTextView"
-            app:srcCompat="@drawable/good" />
+            app:srcCompat="@drawable/good_right" />
 
         <TextView
             android:id="@+id/wantToDoRightTextView"
