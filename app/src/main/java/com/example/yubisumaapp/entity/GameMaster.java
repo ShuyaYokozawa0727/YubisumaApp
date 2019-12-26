@@ -45,11 +45,10 @@ public class GameMaster {
     public void setupNewTurn() {
         turnCount++;
         findNextParent();
-        // プレイヤー達の開始処理
-        for(Player player : players) {
-            player.setupBattle();
-        }
         setTotalFingerSize();
+        for(Player player: players) {
+            player.startNewTurn();
+        }
     }
 
     public void endTurn() {

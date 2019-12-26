@@ -228,6 +228,7 @@ public class YubisumaActivity
         // ポップアップ表示
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         transaction.add(PopUpDialogFragment.newInstance(gameMaster.getPlayer().getVoice(), gameMaster.getPlayer().getComment()), "PopUp");
+        // ここで例外発生
         transaction.commit();
         showingPopUpDialog = true;
         // ボイス再生
@@ -267,6 +268,7 @@ public class YubisumaActivity
     public void onDismissResultDialog() {
         showingResultDialog = false;
 
+        // 各プレイヤーターン終了処理
         gameMaster.endTurn();
         // UI更新
         leftFinger = UIDrawer.checkFingerStock(gameMaster.getPlayer().fingerStock);
@@ -275,7 +277,6 @@ public class YubisumaActivity
 
         // ゲーム終了チェック
         gameMaster.checkGameEnd();
-
         if (!gameMaster.inGame) {
             showResult();
         } else {

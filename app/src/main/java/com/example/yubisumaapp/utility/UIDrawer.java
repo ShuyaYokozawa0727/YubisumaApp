@@ -34,7 +34,7 @@ public class UIDrawer {
     private Context context;
     private ActivityYubisumaBinding binding;
 
-    private String logText="";
+
 
     public UIDrawer(Context context, ActivityYubisumaBinding binding) {
         this.context = context;
@@ -115,8 +115,40 @@ public class UIDrawer {
         }
     }
 
+    private String logText="Turn,P_M_AC_CC_FS_SP_CFS_CSP,O_M_AC_CC_FS_SP_CFS_CSP\n";
     // プレイヤーごとではなく、必要なパラメータのみにする
     public void setTurnLog(int turn, Player user, Player opponent) {
+        int playerCall = 0, playerAction = 0;
+        String playerMotion = "";
+        int opponentCall = 0, opponentAction = 0;
+        String opponentMotion = "";
+
+        if (user.hasAction()) {
+            playerMotion = "Action";
+            playerAction = user.getAction().getStandCount();
+        } else if (user.hasCall()) {
+            playerMotion = "Call";
+            playerCall = user.getCall().getCallCount();
+            playerAction = user.getCall().getAction().getStandCount();
+        } else if (user.hasSkill()) {
+            playerMotion = user.getSkillName();
+        } else {
+            playerMotion = "???";
+        }
+
+        if (opponent.hasAction()) {
+            opponentMotion = "Action";
+            opponentAction = opponent.getAction().getStandCount();
+        } else if (opponent.hasCall()) {
+            opponentMotion = "Call";
+            opponentCall = opponent.getCall().getCallCount();
+            opponentAction = opponent.getCall().getAction().getStandCount();
+        } else if (opponent.hasSkill()) {
+            opponentMotion = opponent.getSkillName();
+        } else {
+            opponentMotion = "???";
+        }
+
         // ステータスの変化
         int changePlayerFingerStock = user.fingerStock - user.beforeFingerStock;
         int changePlayerSkillPoint = user.skillPoint - user.beforeSkillPoint;
@@ -125,11 +157,14 @@ public class UIDrawer {
         int changeOpponentSkillPoint = opponent.skillPoint - opponent.beforeSkillPoint;
 
         // ログをセット(DBを意識！)
-        String playerChangeStatus = "P_"+ user.getSkillName()+"_"+ user.fingerStock+"_"+ user.skillPoint+"_"+changePlayerFingerStock+"_"+changePlayerSkillPoint;
-        String opponentChangeStatus = "O_"+opponent.getSkillName()+"_"+opponent.fingerStock+"_"+opponent.skillPoint+"_"+changeOpponentFingerStock+"_"+changeOpponentSkillPoint;
-        logText += (turn + "," + playerChangeStatus+","+opponentChangeStatus + "\n") ;
+        String playerLog = "P_"+playerMotion+"_"+playerAction+"_"+playerCall+"_";
+        playerLog += user.fingerStock+"_"+ user.skillPoint+"_"+changePlayerFingerStock+"_"+changePlayerSkillPoint;
+        String opponentLog = "O_"+opponentMotion+"_"+opponentAction+"_"+opponentCall+"_";
+        opponentLog += opponent.fingerStock+"_"+opponent.skillPoint+"_"+changeOpponentFingerStock+"_"+changeOpponentSkillPoint;
+        logText += (turn + "," + playerLog+","+opponentLog + "\n") ;
         binding.logTextView.setText(logText);
     }
+
     /*
      * privateこのClass内だけ使われています
      */

@@ -22,7 +22,6 @@ public class CPU extends Player {
 
     private Random random = new Random();
     private Player player;
-    private int totalFingerCount;
 
     public CPU(int skillPoint, int fingerStock, int playerIndex) {
         super(skillPoint, fingerStock, playerIndex);
@@ -30,24 +29,23 @@ public class CPU extends Player {
 
     public void createCPUMotion(Player player, int totalFingerCount) {
         this.player = player;
-        this.totalFingerCount = totalFingerCount;
         motion = null;
         if (isParent) {
-            parentMotion();
+            parentMotion(totalFingerCount);
         } else {
             childMotion();
         }
     }
 
-    private void parentMotion() {
+    private void parentMotion(int totalFingerCount) {
         if (skillPoint == 0) {
             // スキルポイントが0なのでCallするしかない
-            randomCall();
+            this.setMotion(randomCall(totalFingerCount));
         } else {
             // ランダムな確率でCallかSkillか
             boolean useCall = random.nextBoolean();
             if (useCall) {
-                randomCall();
+                this.setMotion(randomCall(totalFingerCount));
             } else {
                 // 発動可能なSkillをランダムに設定
                 randomSkill();
@@ -57,31 +55,28 @@ public class CPU extends Player {
     private void childMotion() {
         // もし今の親のスキルポイントが0ならば
         if(player.skillPoint == 0) {
-            this.setMotion(new Action(random.nextInt(getMyFingerCount())));
+            this.setMotion(randomAction());
         } else  {
             // 今の親のスキルポイントが1以上
             // ランダムな確率でActionか、トラップ発動
             boolean isAction = random.nextBoolean();
             if(isAction) {
-                randomAction();
+                this.setMotion(randomAction());
             } else {
                 setSkill(SkillManager.TRAP);
             }
         }
     }
 
-    private void randomAction() {
-        this.setMotion(new Action(random.nextInt(getMyFingerCount())));
+    private Action randomAction() {
+        return new Action(random.nextInt(1+getMyFingerCount())); // 0~2までの3つの乱数
     }
 
-    private void randomCall() {
-        // 自分以外の指の本数
-        int othersFingersSize = totalFingerCount - getMyFingerCount();
-        // 自分が上げる指の本数
-        int myStandFingerCount = random.nextInt(getMyFingerCount());
-        // コールする数（自分+自分以外の本数を最大値としたランダムな数）
-        int myCallCount = myStandFingerCount + random.nextInt(othersFingersSize);
-        this.setMotion(new Call(new Action(myStandFingerCount), myCallCount));
+    private Call randomCall(int totalFingerCount) {
+        Action action = randomAction();
+        int othersFingersSize = totalFingerCount - getMyFingerCount(); // 自分以外の指の本数
+        int myCallCount = action.getStandCount() + random.nextInt(1+othersFingersSize); // コールする数（自分+自分以外の本数を最大値としたランダムな数）
+        return new Call(action, myCallCount);
     }
 
     private void randomSkill() {

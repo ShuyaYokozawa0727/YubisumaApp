@@ -35,15 +35,16 @@ public class Player {
         return (fingerStock>2) ? 2 : fingerStock;
     }
 
-    public void setupBattle() {
+    public void startNewTurn() {
         LogList.add(this);
+        this.motion = null;
+    }
+
+    public void setupBattle() {
         rememberBeforeStatus();
     }
 
     public void turnEnd() {
-        this.motion = null;
-        isParent = false;
-
         // 最大値に補正
         if(YubisumaActivity.ICON_SIZE < skillPoint) {
             skillPoint = YubisumaActivity.ICON_SIZE;

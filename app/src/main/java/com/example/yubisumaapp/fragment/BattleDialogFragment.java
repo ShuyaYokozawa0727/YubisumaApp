@@ -185,6 +185,7 @@ public class BattleDialogFragment extends BaseDialogFragment {
     @Override
     public void onDismiss(@NonNull DialogInterface dialog) {
         if (mListener != null) {
+            // java.lang.RuntimeException: Unable to destroy activity {com.example.yubisumaapp/com.example.yubisumaapp.activity.YubisumaActivity}: java.lang.IllegalStateException: Can not perform this action after onSaveInstanceState
             mListener.onDismissBattleDialog();
         }
     }

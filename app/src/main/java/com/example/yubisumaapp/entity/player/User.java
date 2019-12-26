@@ -65,7 +65,4 @@ public class User extends Player {
     public String getVoice() { return voice; }
 
     public int getEventID() { return eventID; }
-
-
-
 }
