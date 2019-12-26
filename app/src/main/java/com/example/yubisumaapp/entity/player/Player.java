@@ -1,6 +1,7 @@
 package com.example.yubisumaapp.entity.player;
 
 import com.example.yubisumaapp.activity.YubisumaActivity;
+import com.example.yubisumaapp.entity.GameMaster;
 import com.example.yubisumaapp.entity.motion.Action;
 import com.example.yubisumaapp.entity.motion.Call;
 import com.example.yubisumaapp.entity.motion.Motion;
@@ -21,7 +22,8 @@ public class Player {
     public int beforeSkillPoint = 0;
 
     protected Motion motion;
-    ArrayList<Player> LogList = new ArrayList<>();
+    private ArrayList<Player> LogList = new ArrayList<>();
+
 
     public Player(int skillPoint, int fingerStock, int playerIndex) {
         this.skillPoint = this.beforeSkillPoint = skillPoint;
@@ -33,13 +35,13 @@ public class Player {
         return (fingerStock>2) ? 2 : fingerStock;
     }
 
-    public void setupTurn() {
+    public void setupBattle() {
         LogList.add(this);
         rememberBeforeStatus();
-        this.motion = null;
     }
 
     public void turnEnd() {
+        this.motion = null;
         isParent = false;
 
         // 最大値に補正
@@ -74,6 +76,14 @@ public class Player {
             }
         }
         return availableSkillList;
+    }
+
+    public String getSkillName() {
+        if(motion instanceof Skill) {
+            return getSkill().getSkillName();
+        } else {
+            return "";
+        }
     }
 
     public boolean isUser() {return this instanceof User; }
@@ -115,19 +125,11 @@ public class Player {
         }
     }
 
-    public Motion getMotion() {
-        return this.motion;
-    }
+    public Motion getMotion() { return this.motion; }
 
-    public Action getAction() {
-        return (Action)motion;
-    }
+    public Action getAction() { return (Action)motion; }
 
-    public Call getCall() {
-        return (Call)motion;
-    }
+    public Call getCall() { return (Call)motion; }
 
-    public Skill getSkill() {
-        return (Skill)motion;
-    }
+    public Skill getSkill() { return (Skill)motion; }
 }

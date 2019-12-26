@@ -19,20 +19,23 @@ import com.example.yubisumaapp.entity.motion.Action;
 import com.example.yubisumaapp.entity.motion.Call;
 import com.example.yubisumaapp.entity.motion.skill.ChouChou;
 import com.example.yubisumaapp.entity.motion.skill.TsuchiFumazu;
-import com.example.yubisumaapp.entity.player.GameMaster;
+import com.example.yubisumaapp.entity.GameMaster;
 import com.example.yubisumaapp.entity.player.Player;
 import com.example.yubisumaapp.fragment.BattleDialogFragment;
 import com.example.yubisumaapp.fragment.ChildDialogFragment;
+import com.example.yubisumaapp.fragment.InfomationDialogFragment;
 import com.example.yubisumaapp.fragment.ParentDialogFragment;
 import com.example.yubisumaapp.fragment.PopUpDialogFragment;
 import com.example.yubisumaapp.fragment.ResultDialogFragment;
 import com.example.yubisumaapp.utility.UIDrawer;
 
 public class YubisumaActivity
-        extends AppCompatActivity
-        implements ParentDialogFragment.OnFragmentInteractionListener
-                 , ChildDialogFragment.OnFragmentInteractionListener
-                 , ResultDialogFragment.OnFragmentInteractionListener
+         extends AppCompatActivity
+         implements ParentDialogFragment.OnFragmentInteractionListener
+                  , ChildDialogFragment.OnFragmentInteractionListener
+                  , BattleDialogFragment.OnFragmentInteractionListener
+                  , ResultDialogFragment.OnFragmentInteractionListener
+                  , PopUpDialogFragment.OnFragmentInteractionListener
 {
     // こっから本文
     public static final int ICON_SIZE = 7;
@@ -46,7 +49,8 @@ public class YubisumaActivity
     private MediaPlayer
               soundYubisuma, soundBGM
             , soundZero, soundOne, soundTwo, soundThree, soundFour
-            , soundTuti, soundChocho;
+            , soundTuti, soundChocho
+            , abunee, donmai, iine, nanii, oishi, usodaro, uwa, yaruna, yossya, zamaa;
 
     private int rightFinger=1, leftFinger=1;
 
@@ -55,9 +59,11 @@ public class YubisumaActivity
 
     private void loadSounds() {
         // 音声ファイルをロード
+        // BGM
         soundBGM = MediaPlayer.create(this, R.raw.bgm_dropout);
         soundBGM.setVolume(0.6f, 0.6f);
         soundBGM.setLooping(true);
+        // Voice
         soundYubisuma = MediaPlayer.create(this, R.raw.yubisuma);
         soundZero = MediaPlayer.create(this, R.raw.zero);
         soundOne = MediaPlayer.create(this, R.raw.one);
@@ -66,20 +72,18 @@ public class YubisumaActivity
         soundFour = MediaPlayer.create(this, R.raw.four);
         soundTuti = MediaPlayer.create(this, R.raw.tuti);
         soundChocho = MediaPlayer.create(this, R.raw.chocho);
+        // PopUp
+        abunee = MediaPlayer.create(this, R.raw.abune);
+        donmai = MediaPlayer.create(this, R.raw.donmai);
+        iine = MediaPlayer.create(this, R.raw.iine);
+        nanii = MediaPlayer.create(this, R.raw.nanii);
+        oishi = MediaPlayer.create(this, R.raw.oishi);
+        usodaro = MediaPlayer.create(this, R.raw.usodaro);
+        uwa = MediaPlayer.create(this, R.raw.uwa);
+        yaruna = MediaPlayer.create(this, R.raw.yaruna);
+        yossya = MediaPlayer.create(this, R.raw.yossya);
+        zamaa = MediaPlayer.create(this, R.raw.zamaa);
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        soundBGM.start();
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        soundBGM.pause();
-    }
-
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -107,46 +111,11 @@ public class YubisumaActivity
         binding.rightFingerImageButton.setOnTouchListener(setOnRightTouchListener());
 
         // 再生終了イベントリスナー（Actionを確定する）
-        soundYubisuma.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mp) {
-                // 音声終了
-                playingSound = false;
+        soundYubisuma.setOnCompletionListener(setOnCompletionListener());
 
-                // Actionを決定する
-                gameMaster.addAction(new Action(rightFinger+leftFinger));
-                gameMaster.determineCPUMotion();
-
-                playSounds();
-
-                // 両者のMotionは確定したのでバトル開始（Fragment表示）
-                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-                transaction.add(BattleDialogFragment.newInstance(gameMaster.parentIndex, gameMaster.getMotionList()),"Battle");
-                transaction.commit();
-            }
-
-            private void playSounds() {
-                // 数のボイス再生
-                if(gameMaster.getParent().hasCall()) {
-                    switch (gameMaster.getParent().getCall().getCallCount()) {
-                        case 0 : soundZero.start(); break;
-                        case 1 : soundOne.start(); break;
-                        case 2 : soundTwo.start(); break;
-                        case 3 : soundThree.start(); break;
-                        case 4 : soundFour.start(); break;
-                    }
-                } else if (gameMaster.getParent().hasSkill()){
-                    if(gameMaster.getParent().getSkill() instanceof TsuchiFumazu) {
-                        soundTuti.start();
-                    } else if(gameMaster.getParent().getSkill() instanceof ChouChou) {
-                        soundChocho.start();
-                    }
-                }
-            }
-
-        });
+        // おしらせフラグメントを新しく作成
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.add(PopUpDialogFragment.newInstance("枠外をタップしてね！", "ポップアップを消したい時"), "PopUp");
+        transaction.add(InfomationDialogFragment.newInstance("枠外をタップしてね！", "お知らせ"), "PopUp");
         transaction.commit();
     }
 
@@ -165,6 +134,48 @@ public class YubisumaActivity
             transaction.add(ChildDialogFragment.newInstance(availableSkillNameArray),"Child");
         }
         transaction.commit();
+    }
+
+    private void playYubisuma() {
+        // 音声再生
+        soundYubisuma.start();
+        playingSound = true;
+        binding.playerMotionTextView.setText("音が流れているよ！");
+        binding.opponentMotionTextView.setText("音が流れているよ！");
+        // 再生中は消しておく
+        binding.wantToDoRightTextView.setText("");
+        binding.wantToDoLeftTextView.setText("");
+    }
+
+    private void playVoices() {
+        // 数のボイス再生
+        if(gameMaster.getParent().hasCall()) {
+            switch (gameMaster.getParent().getCall().getCallCount()) {
+                case 0 : soundZero.start(); break;
+                case 1 : soundOne.start(); break;
+                case 2 : soundTwo.start(); break;
+                case 3 : soundThree.start(); break;
+                case 4 : soundFour.start(); break;
+            }
+        } else if (gameMaster.getParent().hasSkill()){
+            if(gameMaster.getParent().getSkill() instanceof TsuchiFumazu) {
+                soundTuti.start();
+            } else if(gameMaster.getParent().getSkill() instanceof ChouChou) {
+                soundChocho.start();
+            }
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        soundBGM.start();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        soundBGM.pause();
     }
 
     // ChildCustomDialogFragmentから呼び出されます。
@@ -187,25 +198,74 @@ public class YubisumaActivity
         if(motionMode == 1) gameMaster.getPlayer().setSkill(motionCount);
     }
 
-    private void playYubisuma() {
-        // 音声再生
-        soundYubisuma.start();
-        playingSound = true;
-        binding.playerMotionTextView.setText("音が流れているよ！");
-        binding.opponentMotionTextView.setText("音が流れているよ！");
-        // 再生中は消しておく
-        binding.wantToDoRightTextView.setText("");
-        binding.wantToDoLeftTextView.setText("");
+    private boolean showingBattleDialog = false;
+    public MediaPlayer.OnCompletionListener setOnCompletionListener() {
+        return new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                // バトル結果を生成
+                // Actionを決定する
+                gameMaster.addAction(new Action(rightFinger+leftFinger));
+                gameMaster.determineCPUMotion();
+                playVoices();
+                // 両者のMotionは確定したのでバトル開始（Fragment表示）
+                gameMaster.createBattleResult();
+                FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+                transaction.add(BattleDialogFragment.newInstance(gameMaster.parentIndex, gameMaster.getMotionList()),"Battle");
+                transaction.commit();
+                showingBattleDialog = true;
+                // 音声終了
+                playingSound = false;
+            }
+        };
+    }
+
+
+    private boolean showingPopUpDialog = false;
+    @Override
+    public void onDismissBattleDialog() {
+        showingBattleDialog = false;
+        // ポップアップ表示
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        transaction.add(PopUpDialogFragment.newInstance(gameMaster.getPlayer().getVoice(), gameMaster.getPlayer().getComment()), "PopUp");
+        transaction.commit();
+        showingPopUpDialog = true;
+        // ボイス再生
+        playPopUpVoice();
+    }
+
+    private void playPopUpVoice() {
+        switch (gameMaster.getPlayer().getEventID()) {
+            case GameMaster.PLAYER_TRAP_FAULT: uwa.start(); break; // OK
+            case GameMaster.OPPONENT_TRAP_FAULT: abunee.start(); break; // 呼び出されない？
+            case GameMaster.PLAYER_CALL_SUCCESS: oishi.start(); break; // OK
+            case GameMaster.OPPONENT_CALL_SUCCESS: yaruna.start(); break; // OK
+            case GameMaster.PLAYER_CALL_FAULT: donmai.start(); break; // OK
+            case GameMaster.OPPONENT_CALL_FAULT: iine.start(); break; // OK
+            case GameMaster.PLAYER_SKILL_FAULT: usodaro.start(); break; // OK
+            case GameMaster.PLAYER_TRAP_SUCCESS: zamaa.start(); break; // OK
+            case GameMaster.PLAYER_SKILL_SUCCESS: yossya.start(); break; // OK
+            case GameMaster.OPPONENT_SKILL_SUCCESS: nanii.start(); break; // OK
+        }
+    }
+
+    private boolean showingResultDialog = false;
+    @Override
+    public void onDismissPopUpDialog() {
+        showingPopUpDialog = false;
+        // おしらせフラグメントを新しく作成
+        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+        int changePlayerFingerStock = gameMaster.getPlayer().fingerStock - gameMaster.getPlayer().beforeFingerStock;
+        int changeOpponentFingerStock = gameMaster.getOpponent().fingerStock - gameMaster.getOpponent().beforeFingerStock;
+        transaction.add(ResultDialogFragment.newInstance(changePlayerFingerStock, changeOpponentFingerStock), "Result");
+        transaction.commit();
+        showingResultDialog = true;
     }
 
     // ResultDialogFragmentから呼ばれます
     @Override
-    public void onDismissResultDialog(int playerChangeFS, int playerChangeSP, int opponentChangeFS, int opponentChangeSP) {
-        // 変化を反映
-        gameMaster.getPlayer().fingerStock += playerChangeFS;
-        gameMaster.getPlayer().skillPoint += playerChangeSP;
-        gameMaster.getOpponent().fingerStock += opponentChangeFS;
-        gameMaster.getOpponent().skillPoint += opponentChangeSP;
+    public void onDismissResultDialog() {
+        showingResultDialog = false;
 
         gameMaster.endTurn();
         // UI更新
@@ -216,7 +276,7 @@ public class YubisumaActivity
         // ゲーム終了チェック
         gameMaster.checkGameEnd();
 
-        if(!gameMaster.inGame) {
+        if (!gameMaster.inGame) {
             showResult();
         } else {
             // 次のターンスタート準備
@@ -224,43 +284,7 @@ public class YubisumaActivity
         }
     }
 
-    // ゲーム終了
-    private void showResult() {
-        String message = "";
-        // TODO:複数人対応
-        for(Player clearPlayer : gameMaster.getClearPlayers()) {
-            if (clearPlayer.isCPU()) {
-                message = " おれじぇねぇぇぇえ！！";
-            } else {
-                message = " 俺！！！";
-            }
-        }
-        new AlertDialog.Builder(this)
-                .setTitle("【バトル終了】")
-                .setMessage("勝者は" + message)
-                .setPositiveButton("バトル再開！", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        Intent intent = getIntent();
-                        overridePendingTransition(0, 0);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                        finish();
-                        overridePendingTransition(0, 0);
-                        startActivity(intent);
-                    }
-                })
-                .setNeutralButton("アプリ終了", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        finish();
-                    }
-                })
-                .setCancelable(false)
-                .show();
-    }
-
     /* ここから両手の処理 */
-
     private View.OnTouchListener setOnLeftTouchListener() {
         return new View.OnTouchListener() {
             @Override
@@ -333,7 +357,7 @@ public class YubisumaActivity
                         }
                     }
                 }
-                if(showDialog) {
+                if(showDialog && (!showingBattleDialog && !showingPopUpDialog && !showingResultDialog)) {
                     leaveFingers = false;
                     showMotionSelectDialogFragment(); // フラグメントから音声再生は呼び出される
                 }
@@ -342,4 +366,38 @@ public class YubisumaActivity
         };
     }
 
+    // ゲーム終了
+    private void showResult() {
+        String message = "";
+        // TODO:複数人対応
+        for(Player clearPlayer : gameMaster.getClearPlayers()) {
+            if (clearPlayer.isCPU()) {
+                message = " おれじぇねぇぇぇえ！！";
+            } else {
+                message = " 俺！！！";
+            }
+        }
+        new AlertDialog.Builder(this)
+                .setTitle("【バトル終了】")
+                .setMessage("勝者は" + message)
+                .setPositiveButton("バトル再開！", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = getIntent();
+                        overridePendingTransition(0, 0);
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                        finish();
+                        overridePendingTransition(0, 0);
+                        startActivity(intent);
+                    }
+                })
+                .setNeutralButton("アプリ終了", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        finish();
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
 }

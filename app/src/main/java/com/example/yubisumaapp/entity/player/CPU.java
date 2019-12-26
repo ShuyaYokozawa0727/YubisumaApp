@@ -18,7 +18,7 @@ import java.util.Random;
  * 各状況に重み付けが必要
  *
  */
-public class CPU extends User {
+public class CPU extends Player {
 
     private Random random = new Random();
     private Player player;
@@ -28,13 +28,13 @@ public class CPU extends User {
         super(skillPoint, fingerStock, playerIndex);
     }
 
-    void createCPUMotion(Player player, int totalFingerCount) {
+    public void createCPUMotion(Player player, int totalFingerCount) {
         this.player = player;
         this.totalFingerCount = totalFingerCount;
         motion = null;
         if (isParent) {
             parentMotion();
-        }else {
+        } else {
             childMotion();
         }
     }

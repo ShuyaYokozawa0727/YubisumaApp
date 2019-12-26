@@ -1,21 +1,21 @@
 package com.example.yubisumaapp.fragment;
 
 import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+
 import com.example.yubisumaapp.R;
 
-public class PopUpDialogFragment extends BaseDialogFragment {
+public class PopUpDialogFragment extends InfomationDialogFragment {
 
     // バンドルから取り出すためのキー
     private static final String MESSAGE = "MESSAGE";
     private static final String TITLE = "TITLE";
-
-    // 取り出したデータの受け口
-    private String message;
-    private String title;
 
     public static PopUpDialogFragment newInstance(String message, String title) {
         PopUpDialogFragment fragment = new PopUpDialogFragment();
@@ -26,21 +26,36 @@ public class PopUpDialogFragment extends BaseDialogFragment {
         return fragment;
     }
 
+    private PopUpDialogFragment.OnFragmentInteractionListener mListener;
+
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            message = getArguments().getString(MESSAGE);
-            title = getArguments().getString(TITLE);
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof PopUpDialogFragment.OnFragmentInteractionListener) {
+            mListener = (PopUpDialogFragment.OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
         }
     }
 
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        super.onCreateDialog(savedInstanceState);
-        customDialog.setContentView(R.layout.dialog_pop_up);
-        ((TextView)customDialog.findViewById(R.id.messagePopUp)).setText(message);
-        ((TextView)customDialog.findViewById(R.id.titlePopUp)).setText(title);
-        return customDialog;
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        if (mListener != null) {
+            mListener.onDismissPopUpDialog();
+        }
     }
+
+    // こいつをActivityで継承して
+    // onParentCustomDialogFragmentInteractionをOverrideする
+    public interface OnFragmentInteractionListener {
+        void onDismissPopUpDialog();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
+    }
+
 }

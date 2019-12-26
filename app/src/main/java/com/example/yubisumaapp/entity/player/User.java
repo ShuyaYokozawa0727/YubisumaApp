@@ -1,12 +1,16 @@
 package com.example.yubisumaapp.entity.player;
 
+import com.example.yubisumaapp.entity.GameMaster;
 import com.example.yubisumaapp.entity.motion.skill.Skill;
 
 import java.util.ArrayList;
 
 public class User extends Player {
 
-    User(int skillPoint, int fingerStock, int playerIndex) {
+    private String comment="", voice="";
+    private int eventID=-1;
+
+    public User(int skillPoint, int fingerStock, int playerIndex) {
         super(skillPoint, fingerStock, playerIndex);
     }
 
@@ -26,11 +30,42 @@ public class User extends Player {
         return activeSkillArray;
     }
 
-    public String getSkillName() {
-        if(motion instanceof Skill) {
-            return getSkill().getSkillName();
-        } else {
-            return "";
+    @Override
+    public void turnEnd() {
+        setSilent();
+        super.turnEnd();
+    }
+
+    public void setComment(String comment) {
+        if(this.comment.equals("")) {
+            this.comment = comment;
         }
     }
+
+    public void setVoice(String voice) {
+        if (this.voice.equals("")){
+            this.voice = voice;
+        }
+    }
+
+    public void setEventID(int eventID) {
+        if (this.eventID == GameMaster.NOT_EVENT) {
+            this.eventID = eventID;
+        }
+    }
+
+    public void setSilent() {
+        comment = "";
+        voice = "";
+        eventID = GameMaster.NOT_EVENT;
+    }
+
+    public String getComment() { return comment; }
+
+    public String getVoice() { return voice; }
+
+    public int getEventID() { return eventID; }
+
+
+
 }

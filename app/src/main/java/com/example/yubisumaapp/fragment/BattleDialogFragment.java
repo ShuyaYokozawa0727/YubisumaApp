@@ -1,6 +1,7 @@
 package com.example.yubisumaapp.fragment;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
@@ -162,21 +163,41 @@ public class BattleDialogFragment extends BaseDialogFragment {
 
     private void setVisibilityAction(int playerIndex, int countID, int visibility) {
         if(playerIndex == parentIndex) {
+            // CustomDialogのsetVisibilityではないのでキャストは必要
             ((ImageView) customDialog.findViewById(R.id.callImageView)).setVisibility(visibility);
         }
         ((ImageView) customDialog.findViewById(countID)).setVisibility(visibility);
     }
 
+    private BattleDialogFragment.OnFragmentInteractionListener mListener;
+
     @Override
-    public void onDismiss(@NonNull DialogInterface dialog) {
-        showResultDialogFragment();
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof BattleDialogFragment.OnFragmentInteractionListener) {
+            mListener = (BattleDialogFragment.OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnFragmentInteractionListener");
+        }
     }
 
-    // 次のフラグメントを表示
-    private void showResultDialogFragment() {
-        // そのバトルがどうだったか？
-        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-        transaction.add(ResultDialogFragment.newInstance(parentIndex, motions),"Battle");
-        transaction.commit();
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        if (mListener != null) {
+            mListener.onDismissBattleDialog();
+        }
+    }
+
+    // こいつをActivityで継承して
+    // onParentCustomDialogFragmentInteractionをOverrideする
+    public interface OnFragmentInteractionListener {
+        void onDismissBattleDialog();
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
     }
 }

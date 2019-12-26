@@ -116,7 +116,7 @@ public class UIDrawer {
     }
 
     // プレイヤーごとではなく、必要なパラメータのみにする
-    public void setTurnLog(int turn, User user, User opponent) {
+    public void setTurnLog(int turn, Player user, Player opponent) {
         // ステータスの変化
         int changePlayerFingerStock = user.fingerStock - user.beforeFingerStock;
         int changePlayerSkillPoint = user.skillPoint - user.beforeSkillPoint;
