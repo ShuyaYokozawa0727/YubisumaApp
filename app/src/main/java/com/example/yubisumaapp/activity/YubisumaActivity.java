@@ -72,7 +72,7 @@ public class YubisumaActivity
         soundFour = MediaPlayer.create(this, R.raw.four);
         soundTuti = MediaPlayer.create(this, R.raw.tuti);
         soundChocho = MediaPlayer.create(this, R.raw.chocho);
-        // PopUp
+        // PopUp\
         abunee = MediaPlayer.create(this, R.raw.abune);
         donmai = MediaPlayer.create(this, R.raw.donmai);
         iine = MediaPlayer.create(this, R.raw.iine);
