@@ -14,25 +14,19 @@ public class Player {
     public int skillPoint;
     public int fingerStock;
     public int playerIndex;
+    public int beforeFingerStock = 0;
+    public int beforeSkillPoint = 0;
 
     public boolean isParent;
     public boolean isClear = false;
 
-    public int beforeFingerStock = 0;
-    public int beforeSkillPoint = 0;
-
     protected Motion motion;
     private ArrayList<Player> LogList = new ArrayList<>();
-
 
     public Player(int skillPoint, int fingerStock, int playerIndex) {
         this.skillPoint = this.beforeSkillPoint = skillPoint;
         this.fingerStock = this.beforeFingerStock = fingerStock;
         this.playerIndex = playerIndex;
-    }
-
-    public int getMyFingerCount() {
-        return (fingerStock>2) ? 2 : fingerStock;
     }
 
     public void startNewTurn() {
@@ -61,6 +55,18 @@ public class Player {
     public void rememberBeforeStatus() {
         beforeFingerStock = this.fingerStock;
         beforeSkillPoint = this.skillPoint;
+    }
+
+    public int getMyFingerCount() {
+        return (fingerStock>2) ? 2 : fingerStock;
+    }
+
+    public int getDiffFingerStock() {
+        return fingerStock - beforeFingerStock;
+    }
+
+    public int getDiffSkillPoint() {
+        return skillPoint - beforeSkillPoint;
     }
 
     public ArrayList<Skill> getAvailableSkillList() {

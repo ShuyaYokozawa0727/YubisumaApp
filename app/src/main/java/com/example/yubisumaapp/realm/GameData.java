@@ -5,6 +5,7 @@ import io.realm.RealmObject;
 public class GameData extends RealmObject {
     private String name;
     private int count;
+    private int score;
 
     public String getName() {
         return name;
@@ -20,5 +21,13 @@ public class GameData extends RealmObject {
 
     public void setCount(int count) {
         this.count = count;
+    }
+
+    public int getScore() {
+        return score;
+    }
+
+    public void setScore(int score) {
+        this.score = score;
     }
 }

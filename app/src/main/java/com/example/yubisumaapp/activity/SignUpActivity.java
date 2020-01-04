@@ -12,6 +12,7 @@ import android.widget.TextView;
 
 import com.example.yubisumaapp.R;
 import com.example.yubisumaapp.realm.GameData;
+import com.example.yubisumaapp.realm.RealmHelper;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -19,7 +20,7 @@ import io.realm.RealmConfiguration;
 public class SignUpActivity extends AppCompatActivity {
     private Button gameStart;
     private EditText nameEditText;
-    private Realm realm;
+    private RealmHelper realmHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,12 +29,7 @@ public class SignUpActivity extends AppCompatActivity {
         gameStart = findViewById(R.id.startGame);
         nameEditText = findViewById(R.id.nameEditText);
 
-        // マイグレーションが必要ならrealmファイルを削除
-        // データを保持しながらスキーマ変更するならマイグレーション
-        RealmConfiguration config = new RealmConfiguration.Builder()
-                .deleteRealmIfMigrationNeeded()
-                .build();
-        realm = Realm.getInstance(config);
+        realmHelper = new RealmHelper();
 
         nameEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
@@ -49,11 +45,11 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // データの保存
-                realm.beginTransaction();
-                GameData data = realm.createObject(GameData.class);
+                realmHelper.realm.beginTransaction();
+                GameData data = realmHelper.realm.createObject(GameData.class);
                 data.setCount(0);
                 data.setName(nameEditText.getText().toString());
-                realm.commitTransaction();
+                realmHelper.realm.commitTransaction();
                 startActivity(new Intent(getApplicationContext(), YubisumaActivity.class));
             }
         });

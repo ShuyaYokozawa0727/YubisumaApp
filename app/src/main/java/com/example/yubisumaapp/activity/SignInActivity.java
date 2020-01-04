@@ -7,26 +7,16 @@ import android.os.Bundle;
 import com.example.yubisumaapp.R;
 
 import android.content.Intent;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
-import com.example.yubisumaapp.realm.GameData;
-
-import io.realm.Realm;
-import io.realm.RealmConfiguration;
-import io.realm.RealmQuery;
-import io.realm.RealmResults;
+import com.example.yubisumaapp.realm.RealmHelper;
 
 public class SignInActivity extends AppCompatActivity {
     private Button gameStart;
-    private TextView countText;
-    private TextView nameText;
-    private Realm realm;
 
-    private GameData gameData;
+    private RealmHelper realmHelper;
     private int count = 0;
 
     @Override
@@ -34,31 +24,25 @@ public class SignInActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sign_in);
         gameStart = findViewById(R.id.startGame);
-        countText = findViewById(R.id.countTextView);
-        nameText = findViewById(R.id.nameTextView);
+        TextView countText = findViewById(R.id.countTextView);
+        TextView nameText = findViewById(R.id.nameTextView);
+        TextView scoreText = findViewById(R.id.scoreTextView);
 
-        // マイグレーションが必要ならrealmファイルを削除
-        // データを保持しながらスキーマ変更するならマイグレーション
-        RealmConfiguration config = new RealmConfiguration.Builder()
-                .deleteRealmIfMigrationNeeded()
-                .build();
-        realm = Realm.getInstance(config);
+        realmHelper = new RealmHelper();
 
-        RealmQuery<GameData> query = realm.where(GameData.class);
-        RealmResults<GameData> result = query.findAll();
-        gameData = result.get(0);
 
-        count = gameData.getCount()+1;
-        countText.setText(""+count);
-        nameText.setText(gameData.getName());
+        count = realmHelper.gameData.getCount()+1;
+        countText.setText(String.valueOf(count));
+        nameText.setText(realmHelper.gameData.getName());
+        scoreText.setText(String.valueOf(realmHelper.gameData.getScore()));
 
         gameStart.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // データの保存
-                realm.beginTransaction();
-                gameData.setCount(count);
-                realm.commitTransaction();
+                realmHelper.realm.beginTransaction();
+                realmHelper.gameData.setCount(count);
+                realmHelper.realm.commitTransaction();
                 startActivity(new Intent(getApplicationContext(), YubisumaActivity.class));
             }
         });

@@ -24,19 +24,23 @@ public class ResultDialogFragment extends BaseDialogFragment {
     // バンドルから取り出すためのキー
     private static final String PCFS = "PCFS";
     private static final String OCFS = "OCFS";
+    private static final String CS = "CS";
 
     private FragmentTransaction transaction;
 
     // 取り出したデータの受け口
     private int playerChangeFS;
     private int opponentChangeFS;
+    private int changeScore;
 
     // 必要なデータを用意する
-    public static ResultDialogFragment newInstance(int playerChangeFS, int opponentChangeFS) {
+    public static ResultDialogFragment newInstance(int playerChangeFS, int opponentChangeFS, int changeScore) {
         // 引数のセット
         Bundle args = new Bundle();
         args.putInt(PCFS, playerChangeFS);
         args.putInt(OCFS, opponentChangeFS);
+        args.putInt(CS, changeScore);
+
         // Fragmentの作成
         ResultDialogFragment fragment = new ResultDialogFragment();
         fragment.setArguments(args);
@@ -49,6 +53,7 @@ public class ResultDialogFragment extends BaseDialogFragment {
         if (getArguments() != null) {
             playerChangeFS = getArguments().getInt(PCFS);
             opponentChangeFS = getArguments().getInt(OCFS);
+            changeScore = getArguments().getInt(CS);
         }
     }
 
@@ -63,9 +68,11 @@ public class ResultDialogFragment extends BaseDialogFragment {
 
         String textPCFS = format.format(playerChangeFS);
         String textOCFS = format.format(opponentChangeFS);
+        String textCS = format.format(changeScore);
 
         ((TextView)customDialog.findViewById(R.id.changePlayerFingerStockTextView)).setText(textPCFS);
         ((TextView)customDialog.findViewById(R.id.changeOpponentFingerStockTextView)).setText(textOCFS);
+        ((TextView)customDialog.findViewById(R.id.scoreTextView)).setText(textCS);
 
         return customDialog;
     }
