@@ -40,12 +40,19 @@ public class CPU extends Player {
     private void parentMotion(int totalFingerCount) {
         if (skillPoint == 0) {
             // スキルポイントが0なのでCallするしかない
-            this.setMotion(randomCall(totalFingerCount));
+            randomCall(totalFingerCount);
+        } else if (4 < skillPoint) {
+            // 70%の確率でスキル発動
+            if (3 < random.nextInt() % 10) {
+                randomSkill();
+            } else {
+                randomCall(totalFingerCount);
+            }
         } else {
-            // ランダムな確率でCallかSkillか
+            // 50%の確率でSkill発動
             boolean useCall = random.nextBoolean();
             if (useCall) {
-                this.setMotion(randomCall(totalFingerCount));
+                randomCall(totalFingerCount);
             } else {
                 // 発動可能なSkillをランダムに設定
                 randomSkill();
@@ -72,11 +79,11 @@ public class CPU extends Player {
         return new Action(random.nextInt(1+getMyFingerCount())); // 0~2までの3つの乱数
     }
 
-    private Call randomCall(int totalFingerCount) {
+    private void randomCall(int totalFingerCount) {
         Action action = randomAction();
         int othersFingersSize = totalFingerCount - getMyFingerCount(); // 自分以外の指の本数
         int myCallCount = action.getStandCount() + random.nextInt(1+othersFingersSize); // コールする数（自分+自分以外の本数を最大値としたランダムな数）
-        return new Call(action, myCallCount);
+        setMotion(new Call(action, myCallCount));
     }
 
     private void randomSkill() {
