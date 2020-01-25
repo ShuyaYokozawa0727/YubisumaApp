@@ -30,7 +30,6 @@ public class SignInActivity extends AppCompatActivity {
 
         realmHelper = new RealmHelper();
 
-
         count = realmHelper.gameData.getCount()+1;
         countText.setText(String.valueOf(count));
         nameText.setText(realmHelper.gameData.getName());

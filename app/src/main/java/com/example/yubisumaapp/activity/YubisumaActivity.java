@@ -41,23 +41,21 @@ public class YubisumaActivity
 {
     // こっから本文
     public static final int ICON_SIZE = 7;
-
-    private GameMaster gameMaster;
     private static int playerSize = 2;
 
     private ActivityYubisumaBinding binding;
+    private GameMaster gameMaster;
     private UIDrawer UIDrawer;
 
+    private int rightFinger=1, leftFinger=1;
+    private boolean playingSound = false;
+    private boolean leaveFingers = true;
+
     private MediaPlayer
-              soundYubisuma, soundBGM
+            soundYubisuma, soundBGM
             , soundZero, soundOne, soundTwo, soundThree, soundFour
             , soundTuti, soundChocho
             , abunee, donmai, iine, nanii, oishi, usodaro, uwa, yaruna, yossya, zamaa;
-
-    private int rightFinger=1, leftFinger=1;
-
-    private boolean playingSound = false;
-    private boolean leaveFingers = true;
 
     private void loadSounds() {
         // 音声ファイルをロード
@@ -120,8 +118,6 @@ public class YubisumaActivity
 
         // Touchイベントリスナーのセット
         binding.leftFingerImageButton.setOnTouchListener(setOnLeftTouchListener());
-
-        // DialogFragment表示
         binding.rightFingerImageButton.setOnTouchListener(setOnRightTouchListener());
 
         // 再生終了イベントリスナー（Actionを確定する）
@@ -129,7 +125,7 @@ public class YubisumaActivity
 
         // おしらせフラグメントを新しく作成
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.add(InfomationDialogFragment.newInstance("枠外をタップしてね！", "お知らせ"), "PopUp");
+        transaction.add(InfomationDialogFragment.newInstance("popupを消すときは枠外をタップしてね！", "お知らせ"), "PopUp");
         transaction.commit();
     }
 
@@ -243,25 +239,6 @@ public class YubisumaActivity
         binding.wantToDoLeftTextView.setText("");
     }
 
-    private void playVoices() {
-        // 数のボイス再生
-        if(gameMaster.getParent().hasCall()) {
-            switch (gameMaster.getParent().getCall().getCallCount()) {
-                case 0 : soundZero.start(); break;
-                case 1 : soundOne.start(); break;
-                case 2 : soundTwo.start(); break;
-                case 3 : soundThree.start(); break;
-                case 4 : soundFour.start(); break;
-            }
-        } else if (gameMaster.getParent().hasSkill()){
-            if(gameMaster.getParent().getSkill() instanceof TsuchiFumazu) {
-                soundTuti.start();
-            } else if(gameMaster.getParent().getSkill() instanceof ChouChou) {
-                soundChocho.start();
-            }
-        }
-    }
-
     // ChildCustomDialogFragmentから呼び出されます。
     // 子としてのMotionが決まった
     @Override
@@ -282,7 +259,29 @@ public class YubisumaActivity
         if(motionMode == 1) gameMaster.getPlayer().setSkill(motionCount);
     }
 
+    private void playVoices() {
+        // 数のボイス再生
+        if(gameMaster.getParent().hasCall()) {
+            switch (gameMaster.getParent().getCall().getCallCount()) {
+                case 0 : soundZero.start(); break;
+                case 1 : soundOne.start(); break;
+                case 2 : soundTwo.start(); break;
+                case 3 : soundThree.start(); break;
+                case 4 : soundFour.start(); break;
+            }
+        } else if (gameMaster.getParent().hasSkill()){
+            if(gameMaster.getParent().getSkill() instanceof TsuchiFumazu) {
+                soundTuti.start();
+            } else if(gameMaster.getParent().getSkill() instanceof ChouChou) {
+                soundChocho.start();
+            }
+        }
+    }
+
     private boolean showingBattleDialog = false;
+    private boolean showingPopUpDialog = false;
+    private boolean showingResultDialog = false;
+
     public MediaPlayer.OnCompletionListener setOnCompletionListener() {
         return new MediaPlayer.OnCompletionListener() {
             @Override
@@ -304,7 +303,6 @@ public class YubisumaActivity
         };
     }
 
-    private boolean showingPopUpDialog = false;
     @Override
     public void onDismissBattleDialog() {
         showingBattleDialog = false;
@@ -315,10 +313,6 @@ public class YubisumaActivity
         transaction.commit();
         showingPopUpDialog = true;
         // ボイス再生
-        playPopUpVoice();
-    }
-
-    private void playPopUpVoice() {
         switch (gameMaster.getPlayer().getEventID()) {
             case GameMaster.P_TRAP_FAULT: uwa.start(); break; // OK
             case GameMaster.O_TRAP_FAULT: abunee.start(); break; // 呼び出されない？
@@ -333,7 +327,6 @@ public class YubisumaActivity
         }
     }
 
-    private boolean showingResultDialog = false;
     @Override
     public void onDismissPopUpDialog() {
         showingPopUpDialog = false;
@@ -376,11 +369,12 @@ public class YubisumaActivity
         for(Player clearPlayer : gameMaster.getClearPlayers()) {
             if (clearPlayer.isCPU()) {
                 message = " おれじぇねぇぇぇえ！！";
-                transaction.add(InfomationDialogFragment.newInstance("勝者は" + message, "【バトル終了】"), "Information");
+                User user = gameMaster.getPlayer();
+                transaction.add(EndGameDialogFragment.newInstance("勝者は" + message, "【バトル終了】", user.startScore, user.getScore(), user.getDiffGameScore()), "EndGame");
             } else {
                 message = " 俺！！！";
-                User clearUser = (User) clearPlayer;
-                transaction.add(EndGameDialogFragment.newInstance("勝者は" + message, "【バトル終了】", clearUser.startScore, clearUser.getScore(), clearUser.getDiffGameScore()), "EndGame");
+                User user = (User) clearPlayer;
+                transaction.add(EndGameDialogFragment.newInstance("勝者は" + message, "【バトル終了】", user.startScore, user.getScore(), user.getDiffGameScore()), "EndGame");
             }
         }
         transaction.commit();

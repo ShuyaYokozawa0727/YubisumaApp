@@ -60,7 +60,7 @@ public class EndGameDialogFragment extends BaseDialogFragment {
         if(0 < diff) {
             ((TextView)customDialog.findViewById(R.id.signWordTextView)).setText("GET!!");
         } else {
-            ((TextView)customDialog.findViewById(R.id.diffScoreTetView)).setTextColor(0xFFD81B60);
+            ((TextView)customDialog.findViewById(R.id.diffScoreTetView)).setTextColor(0xFFD81B60); // 赤
             ((TextView)customDialog.findViewById(R.id.signWordTextView)).setText("LOST...");
         }
 

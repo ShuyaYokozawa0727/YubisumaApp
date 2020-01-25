@@ -224,7 +224,6 @@ public class GameMaster {
                 // 親はコールなのにトラップを発動した（子の時）
                 if (skill instanceof Trap) {
                     player.fingerStock += skill.invokeEffect(false);
-
                     if(getParent().playerIndex == 0) {
                         //getPlayer().setEventID(O_TRAP_FAULT);
                         //getPlayer().setComment("相手のムダトラップ！！");
