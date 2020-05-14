@@ -16,8 +16,11 @@ public class RealmHelper {
                 .deleteRealmIfMigrationNeeded()
                 .build();
         realm = Realm.getInstance(config);
-        RealmQuery<GameData> query = realm.where(GameData.class);
-        RealmResults<GameData> result = query.findAll();
-        gameData = result.get(0);
+
+        //RealmQuery<GameData> query = realm.where(GameData.class);
+        //RealmResults<GameData> result = query.findAll();
+        //if (result.size() != 0) {
+        //    gameData = result.get(0);
+       // }
     }
 }
